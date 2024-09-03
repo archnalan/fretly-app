@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ImBooks } from "react-icons/im";
 import { MdLibraryBooks } from "react-icons/md";
 import { BiSolidCategoryAlt } from "react-icons/bi";
@@ -8,7 +8,9 @@ import { SiMusicbrainz } from "react-icons/si";
 import Sidebar from "./Sidebar";
 import SidebarItem from "./SidebarItem";
 import { useSidebarContext } from "../../Contexts/SidebarContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { RxDashboard } from "react-icons/rx";
 
 const Side: React.FC = () => {
   const sidebarItems = [
@@ -18,7 +20,7 @@ const Side: React.FC = () => {
       icon: <MdLibraryBooks size={30} />,
       alert: true,
     },
-    { text: "Collections", slug: "collections", icon: <ImBooks size={30} /> },
+    { text: "Collections", slug: "songbooks", icon: <ImBooks size={30} /> },
     {
       text: "Categories",
       slug: "categories",
@@ -40,10 +42,29 @@ const Side: React.FC = () => {
 
   const [activeItem, setActiveItem] = useState<string>("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const slugs = sidebarItems.map((item) => item.slug) as [string, ...string[]];
+
+  const sidebarSchema = z.object({
+    slug: z.enum(slugs),
+  });
+
+  useEffect(() => {
+    const path = location.pathname.split("/").pop();
+    const validatedItem = sidebarSchema.safeParse({ slug: path });
+
+    if (validatedItem.success) {
+      const active = sidebarItems.find((item) => item.slug === path);
+      if (active) {
+        setActiveItem(active.text);
+      }
+    }
+  }, [location.pathname]);
 
   return (
     <div className="h-full">
-      <Sidebar>
+      <Sidebar activeItem={activeItem} setActiveItem={setActiveItem}>
         {sidebarItems.map((item, index) => (
           <div
             key={index}

@@ -129,7 +129,11 @@ const Page: React.FC = () => {
         >
           <h2 className="m-3 text-3xl mt-5">List of Pages</h2>
           {errorDelete && (
-            <div className="w-3/4 alert alert-error text-wrap" role="alert">
+            <div
+              className="w-3/4 alert alert-error text-wraptransition-transform duration-500 transform translate-y-0"
+              role="alert"
+              style={{ transition: "transform 0.5s" }}
+            >
               {errorDelete}
             </div>
           )}

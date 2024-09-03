@@ -9,21 +9,30 @@ import { useNavigate } from "react-router-dom";
 
 type sideProps = {
   children: React.ReactNode;
+  activeItem: string;
+  setActiveItem: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const Sidebar: React.FC<sideProps> = ({ children }) => {
+const Sidebar: React.FC<sideProps> = ({
+  children,
+  activeItem,
+  setActiveItem,
+}) => {
   const { expanded, setExpanded } = useSidebarContext();
-  const { active, setActive } = useSidebarContext();
   const { theme } = useThemeContext();
   const navigate = useNavigate();
+  const { active, setActive } = useSidebarContext();
 
   const dashboardClass = classNames(
     "p-4 pb-2 flex justify-between items-center",
     {
-      "bg-neutral text-primary": active && theme === "dark",
-      "bg-gray-300 text-primary": active && theme !== "dark",
-      "hover:bg-neutral text-gray-400": !active && theme === "dark",
-      "hover:bg-gray-200 text-gray-600": !active && theme !== "dark",
+      "bg-neutral text-primary": activeItem === "dashboard" && theme === "dark",
+      "bg-gray-300 text-primary":
+        activeItem === "dashboard" && theme !== "dark",
+      "hover:bg-neutral text-gray-400":
+        activeItem !== "dashboard" && theme === "dark",
+      "hover:bg-gray-200 text-gray-600":
+        activeItem !== "dashboard" && theme !== "dark",
     }
   );
 
@@ -34,17 +43,16 @@ const Sidebar: React.FC<sideProps> = ({ children }) => {
   return (
     <aside className="h-full z-50 w-full bg-base-100">
       <nav className="h-full flex flex-col relative   shadow-sm">
-        <div
-          className={dashboardClass}
-          onClick={() => {
-            setActive(true);
-            navigate("/admin/dashboard");
-          }}
-        >
+        <div className={dashboardClass}>
           <div
             className={`flex items-center ${
               expanded ? "w-full" : "w-0"
             } transition-width duration-300 cursor-pointer overflow-hidden`}
+            onClick={() => {
+              setActiveItem("dashboard");
+              setActive(true);
+              navigate("/admin/dashboard");
+            }}
           >
             <RxDashboard size={30} className="mr-3" />
             <div className="px-2 py-2 font-medium rounded transition-colors duration-300 group">
