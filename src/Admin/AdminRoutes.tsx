@@ -12,6 +12,7 @@ import Dashboard from "./Pages/Dashboard/Dashboard";
 import CategoryDetails from "./Categories/CategoryDetails";
 import BookDetails from "./Collections/BookDetails";
 import SongDetails from "./Songs/SongDetails";
+import CategoryCreate from "./Categories/CategoryCreate";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -27,8 +28,8 @@ const AdminRoutes: React.FC = () => {
           {/* categories */}
           <Route path="categories" element={<Category />}></Route>
           <Route path="categories/:id" element={<CategoryDetails />}></Route>
-          {/* <Route path="categories/create" element={<PageCreate />}></Route>
-          <Route path="categories/edit/:id" element={<PageEdit />}></Route> */}
+          <Route path="categories/create" element={<CategoryCreate />}></Route>
+          {/*<Route path="categories/edit/:id" element={<PageEdit />}></Route> */}
           {/* songbooks */}
           <Route path="songbooks" element={<SongBook />}></Route>
           <Route path="songbooks/:id" element={<BookDetails />}></Route>
