@@ -136,7 +136,7 @@ const SongBook: React.FC = () => {
               </button>
             </div>
             <Link
-              to="/admin/songbooks/create"
+              to="/admin/songbooks/create/step1"
               className={listPage.createButton}
             >
               <RiStickyNoteAddFill />

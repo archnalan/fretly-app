@@ -13,6 +13,7 @@ import {
 import PageRequest from "../../API/PageRequest";
 import { PageModel, PageSchema } from "../../DataModels/PageModel";
 import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
+import { getValidatedTheme } from "../../DataModels/ThemeModel";
 
 const Navbar = () => {
   const [pages, setPages] = useState<PageModel[]>([]);
@@ -22,16 +23,17 @@ const Navbar = () => {
   const [toggle, setToggle] = useState(false);
 
   const toggleTheme = () => {
-    const newTheme = theme === "autumn" ? "dark" : "autumn";
+    const currentTheme = getValidatedTheme();
+    const newTheme = currentTheme === "autumn" ? "dark" : "autumn";
     document.documentElement.setAttribute("data-theme", newTheme);
     setTheme(newTheme);
-    // Save the new theme to local storage
+    //save new theme in local storage
     localStorage.setItem("theme", newTheme);
   };
 
   useEffect(() => {
     // Fetch theme from local storage
-    const storedTheme = localStorage.getItem("theme");
+    const storedTheme = getValidatedTheme();
 
     if (storedTheme) {
       // Apply the stored theme

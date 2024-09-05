@@ -8,7 +8,7 @@ export const SongBookSchema = z.object({
   subTitle: z.string().max(255).optional(),
   description: z.string(),
   publisher: z.string().max(255),
-  publicationDate: z.string(),
+  publicationDate: z.string().min(1, {message: "Date is required"}),
   isbn: z.string().refine(value => value.length >= 10 && value.length <= 13 && parseInt(value, 10), {
     message: "ISBN must be 10 to 13 long number",
   }),

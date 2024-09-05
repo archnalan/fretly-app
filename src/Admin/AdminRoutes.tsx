@@ -13,6 +13,11 @@ import CategoryDetails from "./Categories/CategoryDetails";
 import BookDetails from "./Collections/BookDetails";
 import SongDetails from "./Songs/SongDetails";
 import CategoryCreate from "./Categories/CategoryCreate";
+import CategoryEdit from "./Categories/CategoryEdit";
+import BookCreateRoutes from "./Collections/BookCreate/BookCreateRoutes";
+import SongCreateRoutes from "./Songs/SongCreate/SongCreateRoutes";
+import "./Admin.css";
+import Chordify from "./Chodify/Chordify";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -20,6 +25,7 @@ const AdminRoutes: React.FC = () => {
       <Routes>
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />}></Route>
+          <Route path="chordify" element={<Chordify />}></Route>
           {/* pages */}
           <Route path="pages" element={<Page />}></Route>
           <Route path="pages/create" element={<PageCreate />}></Route>
@@ -29,17 +35,20 @@ const AdminRoutes: React.FC = () => {
           <Route path="categories" element={<Category />}></Route>
           <Route path="categories/:id" element={<CategoryDetails />}></Route>
           <Route path="categories/create" element={<CategoryCreate />}></Route>
-          {/*<Route path="categories/edit/:id" element={<PageEdit />}></Route> */}
+          <Route path="categories/edit/:id" element={<CategoryEdit />}></Route>
           {/* songbooks */}
           <Route path="songbooks" element={<SongBook />}></Route>
           <Route path="songbooks/:id" element={<BookDetails />}></Route>
-          {/* <Route path="songbooks/create" element={<PageCreate />}></Route>
-          <Route path="songbooks/edit/:id" element={<PageEdit />}></Route> */}
+          <Route
+            path="songbooks/create/*"
+            element={<BookCreateRoutes />}
+          ></Route>
+          {/*<Route path="songbooks/edit/:id" element={<PageEdit />}></Route> */}
           {/* songs */}
           <Route path="songs" element={<Song />}></Route>
           <Route path="songs/:id" element={<SongDetails />}></Route>
-          {/* <Route path="songs/create" element={<PageCreate />}></Route>
-          <Route path="songs/edit/:id" element={<PageEdit />}></Route> */}
+          <Route path="songs/create/*" element={<SongCreateRoutes />}></Route>
+          {/*<Route path="songs/edit/:id" element={<PageEdit />}></Route> */}
         </Route>
       </Routes>
     </BrowserRouter>

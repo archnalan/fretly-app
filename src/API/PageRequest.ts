@@ -1,3 +1,4 @@
+import { PageCreateModel } from "../DataModels/PageModel";
 import API from "./API";
 
 const apiEndpoints = {
@@ -10,9 +11,9 @@ const apiEndpoints = {
 
 const fetchAllPages = () => API.get(apiEndpoints.fetchAllPages);
 const fetchPageById = (id: number) => API.get(apiEndpoints.fetchPageById(id));
-const createPage = (pageData: any) =>
+const createPage = (pageData:  PageCreateModel) =>
   API.post(apiEndpoints.createPage, pageData);
-const updatePage = (id: number, pageData: any) =>
+const updatePage = (id: number, pageData:  PageCreateModel) =>
   API.put(apiEndpoints.updatePage(id), pageData);
 const deletePage = (id: number) => API.delete(apiEndpoints.deletePage(id));
 

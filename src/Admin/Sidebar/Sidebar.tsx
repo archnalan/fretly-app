@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { LuChevronFirst, LuChevronLast, LuMoreVertical } from "react-icons/lu";
-import { RxDashboard } from "react-icons/rx";
+import { BiSolidDashboard } from "react-icons/bi";
 import { useSidebarContext } from "../../Contexts/SidebarContext";
-import { PassPhoto } from "../../assets/NavAssets";
+import { PassPhoto, T_dark, T_day } from "../../assets/NavAssets";
 import { useThemeContext } from "../../Contexts/ThemeContext";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
+import { ImMenu3, ImMenu4 } from "react-icons/im";
+import { getValidatedTheme } from "../../DataModels/ThemeModel";
 
 type sideProps = {
   children: React.ReactNode;
@@ -18,10 +20,19 @@ const Sidebar: React.FC<sideProps> = ({
   activeItem,
   setActiveItem,
 }) => {
+  const [toggle, setToggle] = useState(false);
   const { expanded, setExpanded } = useSidebarContext();
-  const { theme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
   const navigate = useNavigate();
   const { active, setActive } = useSidebarContext();
+
+  const toggleTheme = () => {
+    const currentTheme = getValidatedTheme();
+    const newTheme = currentTheme === "autumn" ? "dark" : "autumn";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
 
   const dashboardClass = classNames(
     "p-4 pb-2 flex justify-between items-center",
@@ -54,7 +65,7 @@ const Sidebar: React.FC<sideProps> = ({
               navigate("/admin/dashboard");
             }}
           >
-            <RxDashboard size={30} className="mr-3" />
+            <BiSolidDashboard size={30} className="mr-3" />
             <div className="px-2 py-2 font-medium rounded transition-colors duration-300 group">
               <h5>Dashboard</h5>
             </div>
@@ -75,12 +86,43 @@ const Sidebar: React.FC<sideProps> = ({
             theme === "dark" ? "border-t-neutral" : ""
           } `}
         >
-          <img
-            src={PassPhoto}
-            alt="profile"
-            className="rounded-full"
-            style={{ width: "40px", height: "40px" }}
-          />
+          <div className="hidden md:flex dropdown dropdown-end">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-ghost btn-circle avatar"
+            >
+              <div className="w-10 rounded-full">
+                <img alt="Tailwind CSS Navbar component" src={PassPhoto} />
+              </div>
+            </div>
+
+            <ul
+              tabIndex={0}
+              className="menu menu-md dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+            >
+              <li>
+                <a className="justify-between">
+                  Profile
+                  <span className="badge">New</span>
+                </a>
+              </li>
+              <li className="hidden md:flex mr-4">
+                <img
+                  onClick={toggleTheme}
+                  src={theme === "dark" ? T_day : T_dark}
+                  alt="toggle theme"
+                  className="w-12 cursor-pointer ml-6"
+                />
+              </li>
+              <li>
+                <a>Settings</a>
+              </li>
+              <li>
+                <a>Logout</a>
+              </li>
+            </ul>
+          </div>
           <div
             className={`${
               expanded ? "w-full ml-4" : "w-0"
@@ -93,9 +135,7 @@ const Sidebar: React.FC<sideProps> = ({
                   archnalan@gmail.com
                 </span>
               </div>
-              <div className="">
-                <LuMoreVertical size={30} />
-              </div>
+              <LuMoreVertical size={30} />
             </div>
           </div>
         </div>

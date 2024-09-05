@@ -1,6 +1,6 @@
 
 export const SuccessPopup = {
-  overlay: "w-full h-full flex justify-center items-center fixed bg-gray-500 bg-opacity-50",
+  overlay: "w-full h-full flex justify-center items-center fixed bg-gray-500 bg-opacity-50 z-1",
   container: (theme: string) =>
     `w-1/2 flex flex-col relative border bg-base-100 shadow-xl px-5 pt-3 rounded-xl ${
       theme === "dark" ? "border-stone-800 text-slate-300" : ""

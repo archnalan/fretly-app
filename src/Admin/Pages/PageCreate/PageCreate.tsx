@@ -11,12 +11,16 @@ import {
 import PageRequest from "../../../API/PageRequest";
 import { Link, useNavigate } from "react-router-dom";
 import { useThemeContext } from "../../../Contexts/ThemeContext";
+import axios from "axios";
 
 const PageCreate: React.FC = () => {
   const {
     register,
     watch,
+    trigger,
+    setError,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PageCreateModel>({
     resolver: zodResolver(PageCreateSchema),
@@ -26,6 +30,14 @@ const PageCreate: React.FC = () => {
   const [openSuccess, setOpenSuccess] = useState(false);
   const { theme } = useThemeContext();
   const navigate = useNavigate();
+
+  const handlePageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (errors.root) {
+      setError("root", {});
+    }
+    setValue("title", e.target.value);
+    trigger("title"); // allow realtime feedback
+  };
 
   const onSubmit = async (data: PageCreateModel) => {
     try {
@@ -37,12 +49,19 @@ const PageCreate: React.FC = () => {
         setOpenSuccess(true);
       }
     } catch (error) {
-      console.error("Error Sending Data", error);
+      if (axios.isAxiosError(error) && error.response) {
+        const serverMessage = error.response.data;
+        setError("root", { message: serverMessage });
+      } else {
+        setError("root", {
+          message: `Category ${data.title} not created. Try Again!`,
+        });
+      }
     }
   };
 
   return (
-    <div className="flex w-full h-full justify-center relative items-center bg-base-200 z-0">
+    <div className="w-full h-full flex justify-center items-center relative bg-base-200 z-0">
       <div
         className={`${
           theme === "dark" ? "text-neutral-300" : "text-dark"
@@ -52,14 +71,15 @@ const PageCreate: React.FC = () => {
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-4 flex justify-between">
-              <label htmlFor="title" className="text-lg font-semibold">
+              <label htmlFor="title" className="text-lg font-semibold required">
                 Title
               </label>
               <div className="w-3/4">
                 <input
                   type="text"
+                  name="title"
                   className="input input-bordered w-full mb-1"
-                  {...register("title")}
+                  onChange={handlePageChange}
                 />
                 {errors.title && (
                   <p className="text-error text-sm">{errors.title.message}</p>
@@ -68,7 +88,10 @@ const PageCreate: React.FC = () => {
             </div>
 
             <div className="mb-4 flex justify-between">
-              <label htmlFor="content" className="text-lg font-semibold">
+              <label
+                htmlFor="content"
+                className="text-lg font-semibold required"
+              >
                 Content
               </label>
               <div className="w-3/4">
@@ -99,6 +122,9 @@ const PageCreate: React.FC = () => {
                 Save
               </button>
             </div>
+            {errors.root && (
+              <p className="text-error text-sm mb-2">{errors.root.message}</p>
+            )}
           </form>
         </div>
       </div>

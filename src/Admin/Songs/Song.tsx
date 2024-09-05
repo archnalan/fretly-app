@@ -147,7 +147,7 @@ const Song: React.FC = () => {
                 <IoSearchOutline />
               </button>
             </div>
-            <Link to="/songs/basicinfo" className={listPage.createButton}>
+            <Link to="create/step1" className={listPage.createButton}>
               <RiStickyNoteAddFill />
             </Link>
           </div>

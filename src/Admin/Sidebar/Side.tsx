@@ -10,10 +10,16 @@ import SidebarItem from "./SidebarItem";
 import { useSidebarContext } from "../../Contexts/SidebarContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { RxDashboard } from "react-icons/rx";
+import { BsGrid3X3 } from "react-icons/bs";
 
 const Side: React.FC = () => {
   const sidebarItems = [
+    {
+      text: "chordify",
+      slug: "chordify",
+      icon: <GiMusicalScore size={30} />,
+      alert: true,
+    },
     {
       text: "Pages",
       slug: "pages",
@@ -36,7 +42,7 @@ const Side: React.FC = () => {
     {
       text: "Chord charts",
       slug: "chordcharts",
-      icon: <GiMusicalScore size={30} />,
+      icon: <BsGrid3X3 size={30} />,
     },
   ];
 

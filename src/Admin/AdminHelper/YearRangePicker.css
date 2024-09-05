@@ -1,0 +1,5 @@
+.custom-range-picker .ant-picker-input>input {
+    text-align: center;
+    font-size: 1.2em;
+    padding: .5rem;
+}

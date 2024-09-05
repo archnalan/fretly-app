@@ -7,13 +7,17 @@ import CategoryRequest from "../../API/CategoryRequest";
 import { createPage } from "../SharedClassNames/createPage";
 import { useThemeContext } from "../../Contexts/ThemeContext";
 import CategorySuccess from "./CategorySuccess";
+import axios from "axios";
 
 const CategoryCreate: React.FC = () => {
   const {
     register,
     watch,
+    trigger,
+    setValue,
+    setError,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
   } = useForm<CategoryModel>({
     resolver: zodResolver(CategorySchema),
     mode: "all",
@@ -23,9 +27,11 @@ const CategoryCreate: React.FC = () => {
     },
   });
 
-  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  /* const [categories, setCategories] = useState<CategoryModel[]>([]); */
+  const [parentCategories, setParentCategories] = useState<CategoryModel[]>([]);
   const [openSuccess, setOpenSuccess] = useState(false);
   const { theme } = useThemeContext();
+  const categoryId = watch("parentCategoryId");
 
   useEffect(() => {
     const getCategories = async () => {
@@ -42,13 +48,30 @@ const CategoryCreate: React.FC = () => {
           );
           return;
         }
-        setCategories(categoryResult.data);
+        const categories = categoryResult.data;
+        if (categories) {
+          /* setCategories(categories); */
+
+          const parentCategories = categories.filter(
+            (cat) => cat.parentCategoryId === null
+          );
+
+          setParentCategories(parentCategories);
+        }
       } catch (error) {
         console.error("Error fetching categories: ", error);
       }
     };
     getCategories();
   }, []);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (errors.root) {
+      setError("root", {});
+    }
+    setValue("name", e.target.value);
+    trigger("name"); //get realtime feedback
+  };
 
   const onSubmit = async (data: CategoryModel) => {
     console.log("🚀 ~ sendCategoryData ~ hymnCategory:", data);
@@ -61,25 +84,33 @@ const CategoryCreate: React.FC = () => {
         setOpenSuccess(true);
       }
     } catch (error) {
-      console.error("Error Sending Data", error);
+      if (axios.isAxiosError(error) && error.response) {
+        const serverMessage = error.response.data;
+        setError("root", { message: serverMessage });
+      } else {
+        setError("root", {
+          message: `Category ${data.name} not created. Try Again!`,
+        });
+      }
     }
   };
 
   return (
-    <div className={createPage.container}>
+    <div className={createPage.containerSmall}>
       <div className={createPage.innerContainer(theme)}>
         <h1 className={createPage.header}>Create a Category</h1>
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className={createPage.form}>
-              <label htmlFor="title" className={createPage.label}>
+              <label htmlFor="name" className={createPage.labelRequired}>
                 <strong>Name</strong>
               </label>
               <div className={createPage.inputContainer}>
                 <input
                   type="text"
                   className={createPage.input}
-                  {...register("name")}
+                  name="name"
+                  onChange={handleCategoryChange}
                 />
                 {errors.name && (
                   <p className={createPage.errorText}>{errors.name.message}</p>
@@ -88,7 +119,7 @@ const CategoryCreate: React.FC = () => {
             </div>
 
             <div className={createPage.selectContainer}>
-              <label htmlFor="hymnTitle" className={createPage.label}>
+              <label htmlFor="category" className={createPage.label}>
                 <strong>Category</strong>
               </label>
               <div className={createPage.selectInnerContainer}>
@@ -98,26 +129,25 @@ const CategoryCreate: React.FC = () => {
                   })}
                   id="category-select"
                   className={createPage.selectElement}
+                  value={categoryId || ""}
                 >
-                  <option value="" disabled selected>
-                    No Parent Category
-                  </option>
-                  {categories &&
-                    categories.map((category) => (
+                  <option value="">No Parent Category</option>
+                  {parentCategories &&
+                    parentCategories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
                     ))}
                 </select>
                 {errors.parentCategoryId && (
-                  <p className="text-danger text-sm">
+                  <p className={createPage.errorText}>
                     {errors.parentCategoryId.message}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* <pre>{JSON.stringify(watch(), null, 2)}</pre> */}
+            <pre>{JSON.stringify(watch(), null, 2)}</pre>
             <div className={createPage.buttonContainer}>
               <Link to="/admin/categories">
                 <button className={createPage.backButton}>Cancel</button>
@@ -125,11 +155,14 @@ const CategoryCreate: React.FC = () => {
               <button
                 type="submit"
                 className={createPage.saveButton}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isValid}
               >
                 Save
               </button>
             </div>
+            {errors.root && (
+              <p className={createPage.errorText}>{errors.root.message}</p>
+            )}
           </form>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { z } from "zod";
 export  const SongSchema = z.object ({
     id: z.number(),
     number: z.number({message:"Please enter a number!"}).positive({message:"A positive number is required!"}),
-    title: z.string({message: "Please enter a title."}),
+    title: z.string().min(1, {message: "Please enter a title."}),
     slug: z.string().optional(),
     writtenDateRange: z.string({message:"Invalid Date Range!"}).nullable().optional(),
     writtenBy: z.string().optional(),
