@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LuChevronFirst, LuChevronLast, LuMoreVertical } from "react-icons/lu";
 import { BiSolidDashboard } from "react-icons/bi";
 import { useSidebarContext } from "../../Contexts/SidebarContext";
@@ -20,11 +20,20 @@ const Sidebar: React.FC<sideProps> = ({
   activeItem,
   setActiveItem,
 }) => {
-  const [toggle, setToggle] = useState(false);
   const { expanded, setExpanded } = useSidebarContext();
   const { theme, setTheme } = useThemeContext();
   const navigate = useNavigate();
-  const { active, setActive } = useSidebarContext();
+  const { setActive } = useSidebarContext();
+
+  useEffect(() => {
+    //activate based on the url
+    const path = location.pathname.split("/")[2];
+
+    if (path === "dashboard") {
+      setActiveItem("dashboard");
+      setActive(true);
+    }
+  }, [location]);
 
   const toggleTheme = () => {
     const currentTheme = getValidatedTheme();

@@ -51,9 +51,9 @@ const SongTitle: React.FC<SongTitleType> = ({ setVerse }) => {
 
   return (
     <>
-      <div className="w-full h-full items-center bg-base-200">
+      <div className="w-full h-full bg-base-200">
         <select
-          className="input input-bordered select-text text-xl font-semibold font-inter mt-3 mb-2"
+          className="select select-bordered w-full max-w-fit text-xl font-semibold font-inter mt-3 mb-2"
           onChange={handleSongChange}
         >
           {hymns.map((hymn) => (

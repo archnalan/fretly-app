@@ -3,7 +3,7 @@ import { PageModel } from "../../DataModels/PageModel";
 import { useThemeContext } from "../../Contexts/ThemeContext";
 
 type popUPMessage = {
-  todelete: PageModel;
+  todelete: PageModel[];
   handleDelete: (name: string, id: number) => void;
   setOpenConfirm: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -31,8 +31,25 @@ const PageDelete: React.FC<popUPMessage> = ({
           </button>
         </div>
         <p className="text-xl mt-10 mb-5">
-          Do you want to delete the page <strong>{todelete.title}</strong>?
+          <span>
+            Do you want to delete the page{todelete.length > 1 ? "s " : " "}
+          </span>
+          <strong>
+            {todelete.length === 1 ? (
+              <span>{todelete[0].title}</span>
+            ) : (
+              todelete.map((page, index) => (
+                <span key={page.id}>
+                  {page.title}
+                  {index < todelete.length - 2 ? ", " : ""}
+                  {index === todelete.length - 2 ? " and " : ""}
+                </span>
+              ))
+            )}
+          </strong>
+          ?
         </p>
+
         <div className="flex justify-center mb-5">
           <button
             className="btn btn-error text-xl px-5 me-4"
@@ -43,7 +60,8 @@ const PageDelete: React.FC<popUPMessage> = ({
           <button
             className="btn btn-primary text-xl  px-4 "
             onClick={() => {
-              handleDelete(todelete.title, todelete.id);
+              todelete.map((page) => handleDelete(page.title, page.id));
+
               setOpenConfirm(false);
             }}
           >

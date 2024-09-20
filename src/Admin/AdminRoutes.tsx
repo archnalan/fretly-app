@@ -18,6 +18,9 @@ import BookCreateRoutes from "./Collections/BookCreate/BookCreateRoutes";
 import SongCreateRoutes from "./Songs/SongCreate/SongCreateRoutes";
 import "./Admin.css";
 import Chordify from "./Chodify/Chordify";
+import ChordList from "./Chords/ChordList";
+import ChartList from "./Charts/ChartList";
+import ChartDetails from "./Charts/ChartDetails";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -43,12 +46,24 @@ const AdminRoutes: React.FC = () => {
             path="songbooks/create/*"
             element={<BookCreateRoutes />}
           ></Route>
-          {/*<Route path="songbooks/edit/:id" element={<PageEdit />}></Route> */}
           {/* songs */}
           <Route path="songs" element={<Song />}></Route>
           <Route path="songs/:id" element={<SongDetails />}></Route>
           <Route path="songs/create/*" element={<SongCreateRoutes />}></Route>
           {/*<Route path="songs/edit/:id" element={<PageEdit />}></Route> */}
+          {/*<Route path="songbooks/edit/:id" element={<PageEdit />}></Route> */}
+          {/* chords */}
+          <Route path="chords" element={<ChordList />}></Route>
+          {/*<Route path="chords/:id" element={<ChordDetails />}></Route>
+          <Route path="chords/create/*" element={<ChordCreateRoutes />}></Route>
+          <Route path="chords/edit/:id" element={<PageEdit />}></Route> */}
+          {/*<Route path="chords/edit/:id" element={<PageEdit />}></Route> */}
+          {/* charts */}
+          <Route path="chordcharts" element={<ChartList />}></Route>
+          <Route path="chordcharts/:id" element={<ChartDetails />}></Route>
+          {/*<Route path="chordcharts/create/*" element={<ChartCreateRoutes />}></Route>
+          <Route path="chordcharts/edit/:id" element={<PageEdit />}></Route> */}
+          {/*<Route path="chordcharts/edit/:id" element={<PageEdit />}></Route> */}
         </Route>
       </Routes>
     </BrowserRouter>

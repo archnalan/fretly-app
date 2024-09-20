@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   SongWithCategory,
   SongWithCategorySchema,
@@ -8,6 +8,7 @@ import { idSchema } from "../../DataModels/ValidatedID";
 import SongRequest from "../../API/SongRequest";
 import { detailsPage } from "../SharedClassNames/detailsPage";
 import { useThemeContext } from "../../Contexts/ThemeContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const SongDetails = () => {
   const [song, setSong] = useState<SongWithCategory>({
@@ -23,6 +24,7 @@ const SongDetails = () => {
 
   const { id } = useParams();
   const { theme } = useThemeContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getSong = async () => {
@@ -43,7 +45,17 @@ const SongDetails = () => {
   return (
     <div className={detailsPage.container}>
       <div className={detailsPage.innerContainer(theme)}>
-        <h1 className={detailsPage.header}>Song Details</h1>
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className={detailsPage.backHeaderButton}
+          >
+            <IoMdArrowRoundBack />
+          </button>
+          <h3 className={detailsPage.header}>
+            <strong>Song Details</strong>
+          </h3>
+        </div>
 
         <div className={detailsPage.detailRow}>
           <strong>Number</strong>
@@ -76,9 +88,12 @@ const SongDetails = () => {
         <hr className={detailsPage.line(theme)} />
 
         <div className={detailsPage.buttonContainer}>
-          <Link to={"/admin/songs"} className={detailsPage.backButton}>
+          <button
+            onClick={() => navigate(-1)}
+            className={detailsPage.backButton}
+          >
             Back
-          </Link>
+          </button>
           <Link
             to={`/admin/songs/edit/${id}`}
             className={detailsPage.editButton}

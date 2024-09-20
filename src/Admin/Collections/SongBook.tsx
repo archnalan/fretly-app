@@ -186,6 +186,11 @@ const SongBook: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            {currentBooks.length == 0 && (
+              <pre className="w-full h-full flex justify-center items-center">
+                <span className="loading loading-spinner text-info loading-lg"></span>
+              </pre>
+            )}
           </div>
         </div>
         <div className={listPage.paginationContainer}>

@@ -57,7 +57,8 @@ const Side: React.FC = () => {
   });
 
   useEffect(() => {
-    const path = location.pathname.split("/").pop();
+    const path = location.pathname.split("/")[2];
+
     const validatedItem = sidebarSchema.safeParse({ slug: path });
 
     if (validatedItem.success) {
@@ -66,10 +67,10 @@ const Side: React.FC = () => {
         setActiveItem(active.text);
       }
     }
-  }, [location.pathname]);
+  }, [location, sidebarItems]);
 
   return (
-    <div className="h-full">
+    <div className="h-full ">
       <Sidebar activeItem={activeItem} setActiveItem={setActiveItem}>
         {sidebarItems.map((item, index) => (
           <div

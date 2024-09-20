@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import BookRequest from "../../API/BookRequest";
 import { format } from "date-fns";
 import { idSchema } from "../../DataModels/ValidatedID";
 import { SongBookModel, SongBookSchema } from "../../DataModels/SongBookModel";
 import { detailsPage } from "../SharedClassNames/detailsPage";
 import { useThemeContext } from "../../Contexts/ThemeContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const BookDetails: React.FC = () => {
   const [book, setBook] = useState<SongBookModel>({
@@ -21,6 +22,7 @@ const BookDetails: React.FC = () => {
 
   const { id } = useParams();
   const { theme } = useThemeContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getSong = async () => {
@@ -53,7 +55,17 @@ const BookDetails: React.FC = () => {
   return (
     <div className={detailsPage.container}>
       <div className={detailsPage.innerContainer(theme)}>
-        <h1 className={detailsPage.header}>Collection Details</h1>
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className={detailsPage.backHeaderButton}
+          >
+            <IoMdArrowRoundBack />
+          </button>
+          <h3 className={detailsPage.header}>
+            <strong>Collection Details</strong>
+          </h3>
+        </div>
         <div className={detailsPage.detailRow}>
           <strong>Title</strong>
           <span>{book.title}</span>
@@ -103,9 +115,12 @@ const BookDetails: React.FC = () => {
         <hr className={detailsPage.line(theme)} />
 
         <div className={detailsPage.buttonContainer}>
-          <Link to={"/admin/songbooks"} className={detailsPage.backButton}>
+          <button
+            onClick={() => navigate(-1)}
+            className={detailsPage.backButton}
+          >
             Back
-          </Link>
+          </button>
           <Link
             to={`/admin/songbooks/edit/${id}`}
             className={detailsPage.editButton}

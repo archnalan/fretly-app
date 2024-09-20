@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { CategoryModel, CategorySchema } from "../../DataModels/CategoryModel";
 import { idSchema } from "../../DataModels/ValidatedID";
 import CategoryRequest from "../../API/CategoryRequest";
 import { detailsPage } from "../SharedClassNames/detailsPage";
 import { useThemeContext } from "../../Contexts/ThemeContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const CategoryDetails: React.FC = () => {
   const [category, setCategory] = useState<CategoryModel>({
@@ -17,6 +18,7 @@ const CategoryDetails: React.FC = () => {
 
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const { id } = useParams();
+  const navigate = useNavigate();
   const { theme } = useThemeContext();
 
   useEffect(() => {
@@ -67,8 +69,17 @@ const CategoryDetails: React.FC = () => {
   return (
     <div className={detailsPage.container}>
       <div className={detailsPage.innerContainer(theme)}>
-        <h1 className={detailsPage.header}>Category Details</h1>
-
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className={detailsPage.backHeaderButton}
+          >
+            <IoMdArrowRoundBack />
+          </button>
+          <h3 className={detailsPage.header}>
+            <strong>Category Details</strong>
+          </h3>
+        </div>
         <div className={detailsPage.detailRow}>
           <strong>Name</strong>
           <span>{category.name}</span>
@@ -99,9 +110,12 @@ const CategoryDetails: React.FC = () => {
         <hr className={detailsPage.line(theme)} />
 
         <div className={detailsPage.buttonContainer}>
-          <Link to={"/admin/categories"} className={detailsPage.backButton}>
+          <button
+            onClick={() => navigate(-1)}
+            className={detailsPage.backButton}
+          >
             Back
-          </Link>
+          </button>
           <Link
             to={`/admin/categories/edit/${id}`}
             className={detailsPage.editButton}

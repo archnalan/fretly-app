@@ -215,6 +215,11 @@ const Category: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            {currentCategories.length == 0 && (
+              <pre className={listPage.spinnerPreview}>
+                <span className={listPage.spinnerSpan}></span>
+              </pre>
+            )}
           </div>
         </div>
         <div className={listPage.paginationContainer}>

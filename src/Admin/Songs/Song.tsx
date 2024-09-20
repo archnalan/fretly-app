@@ -196,6 +196,11 @@ const Song: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            {currentSongs.length == 0 && (
+              <pre className={listPage.spinnerPreview}>
+                <span className={listPage.spinnerSpan}></span>
+              </pre>
+            )}
           </div>
         </div>
         <div className={listPage.paginationContainer}>
