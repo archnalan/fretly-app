@@ -52,7 +52,9 @@ const Song03InfoReview: React.FC<popupModal> = ({
           <SongProgressbar />
         </div>
         <div className={createPage.innerContainer(theme)}>
-          <SongHeader />
+          <div className={createPage.header}>
+            <SongHeader />
+          </div>
           <div className={detailsPage.detailRow}>
             <label htmlFor="title" className={createPage.label}>
               <strong>Number</strong>

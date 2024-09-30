@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
-import { RiStickyNoteAddFill } from "react-icons/ri";
+import { RiMoreFill, RiStickyNoteAddFill } from "react-icons/ri";
 import { FiEdit, FiList, FiTrash2 } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SongBookModel, SongBookSchema } from "../../DataModels/SongBookModel";
@@ -15,9 +15,8 @@ const SongBook: React.FC = () => {
   const [songBooks, setSongBooks] = useState<SongBookModel[]>([]);
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
-  const [toDelete, setToDelete] = useState<SongBookModel | undefined>(
-    undefined
-  );
+  const [toDelete, setToDelete] = useState<SongBookModel[]>([]);
+  const [selectedBooks, setSelectedBooks] = useState<SongBookModel[]>([]);
   const [bookSearch, setBookSearch] = useState<SongBookModel[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [songsPerPage] = useState(6);
@@ -89,6 +88,14 @@ const SongBook: React.FC = () => {
     }
   };
 
+  const handleSelectPage = (book: SongBookModel, isChecked: boolean) => {
+    setSelectedBooks((prevSelectedBooks) =>
+      isChecked
+        ? [...prevSelectedBooks, book]
+        : prevSelectedBooks.filter((p) => p.id !== book.id)
+    );
+  };
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchQuery = e.target.value.toLowerCase();
 
@@ -116,90 +123,140 @@ const SongBook: React.FC = () => {
   return (
     <div className={listPage.container}>
       <div className={listPage.innerContainer(theme)}>
+        {/* {errorDelete && <ErrorMessage errorMessage={errorDelete} />} */}
         <h1 className={listPage.header}>Music Collection</h1>
         {successMessage && (
-          <div className={listPage.successAlert} role="alert">
-            {successMessage}
+          <div className={listPage.toastContainer}>
+            <div className={listPage.toastDiv}>
+              <span>{successMessage}</span>
+            </div>
           </div>
         )}
+
         <div className={listPage.contentContainer}>
           <div className={listPage.searchContainer}>
             <div className={listPage.searchInputContainer}>
               <input
                 type="text"
                 className={listPage.searchInput}
-                placeholder="Find a collection..."
+                placeholder="find a collection..."
                 onChange={handleSearch}
               />
               <button className={listPage.searchButton}>
-                <IoSearchOutline />
+                <IoSearchOutline size={20} />
               </button>
             </div>
             <Link
               to="/admin/songbooks/create/step1"
-              className={listPage.createButton}
+              className={listPage.createLinkContainer}
             >
-              <RiStickyNoteAddFill />
+              <label htmlFor="#createlink" className={listPage.createLinkLabel}>
+                Add Collection
+              </label>
+              <button id="createlink" className={listPage.createButton}>
+                <RiStickyNoteAddFill />
+              </button>
             </Link>
           </div>
-          <div className={listPage.tableContainer}>
-            <table className={listPage.table}>
-              <thead className={listPage.tableHeader(theme)}>
-                <tr>
-                  <td className="col-number">Title</td>
-                  <td className="col-title">Publisher</td>
-                  <td className="col-author">Author</td>
-                  <td className="col-actions">Actions</td>
-                </tr>
-              </thead>
-              <tbody className="table-group-divider">
-                {currentBooks.map((book) => (
-                  <tr key={book.id}>
-                    <td>{book.title}</td>
-                    <td>{book.publisher}</td>
-                    <td>{book.author}</td>
-                    <td>
-                      <Link
-                        to={`${book.id}`}
-                        className={listPage.detailsButton}
-                      >
-                        <FiList />
-                      </Link>
-                      <Link
-                        to={`edit/${book.id}`}
-                        className={listPage.editButton}
-                      >
-                        <FiEdit />
-                      </Link>
-
-                      <button
-                        className={listPage.deleteButton}
-                        onClick={() => {
-                          setToDelete(book);
-                          setOpenConfirm(true);
-                        }}
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {currentBooks.length == 0 && (
-              <pre className="w-full h-full flex justify-center items-center">
-                <span className="loading loading-spinner text-info loading-lg"></span>
-              </pre>
-            )}
-          </div>
         </div>
+
+        <div className={listPage.tableContainer}>
+          <table className={listPage.table(theme)}>
+            <thead className={listPage.tableHead}>
+              <tr>
+                <th>
+                  {selectedBooks.length > 0 && (
+                    <button
+                      className="btn btn-error btn-sm"
+                      onClick={() => {
+                        setToDelete(selectedBooks);
+                        setOpenConfirm(true);
+                      }}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  )}
+                </th>
+                <th className="col-number">Title</th>
+                <th className="col-title">Publisher</th>
+                <th className="col-author">Author</th>
+                <th className="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="table-group-divider">
+              {currentBooks.map((book) => (
+                <tr key={book.id}>
+                  <td>
+                    <label>
+                      <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={selectedBooks.some((p) => p.id === book.id)}
+                        onChange={(e) =>
+                          handleSelectPage(book, e.target.checked)
+                        }
+                      />
+                    </label>
+                  </td>
+                  <td>{book.title}</td>
+                  <td>{book.publisher}</td>
+                  <td>{book.author}</td>
+                  <td>
+                    <div className="dropdown dropdown-right ">
+                      <button tabIndex={0} className="btn btn-ghost btn-circle">
+                        <RiMoreFill size={24} />
+                      </button>
+                      <ul
+                        tabIndex={1}
+                        className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
+                      >
+                        <li className="w-full">
+                          <Link
+                            to={`${book.id}`}
+                            className={listPage.detailsButton}
+                          >
+                            <FiList className="mr-2" /> Details
+                          </Link>
+                        </li>
+                        <li className="w-full">
+                          <Link
+                            to={`edit/${book.id}`}
+                            className={listPage.editButton}
+                          >
+                            <FiEdit className="mr-2" /> Edit
+                          </Link>
+                        </li>
+                        <li className="w-full">
+                          <button
+                            className={listPage.deleteButton}
+                            onClick={() => {
+                              setToDelete([...toDelete, book]);
+                              setOpenConfirm(true);
+                            }}
+                          >
+                            <FiTrash2 className="mr-2" /> Delete
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {currentBooks.length == 0 && (
+            <pre className="w-full h-full flex justify-center items-center">
+              <span className="loading loading-spinner text-info loading-lg"></span>
+            </pre>
+          )}
+        </div>
+
         <div className={listPage.paginationContainer}>
           <Pagination pageCount={pageCount} onPageChange={handlePageChange} />
         </div>
         {openConfirm && toDelete && (
           <BookDelete
-            title={toDelete.title}
-            bookId={toDelete.id}
+            todelete={toDelete}
             setOpenConfirm={setOpenConfirm}
             handleDelete={handleDelete}
           />

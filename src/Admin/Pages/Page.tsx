@@ -9,7 +9,7 @@ import PageRequest from "../../API/PageRequest";
 import PageDelete from "./PageDelete";
 import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 import Pagination from "../../Helper/Pagination";
-import PageCards from "./pageCards";
+import ErrorMessage from "../AdminHelper/ErrorMessage";
 
 const Page: React.FC = () => {
   const [pages, setPages] = useState<PageModel[]>([]);
@@ -100,14 +100,20 @@ const Page: React.FC = () => {
         console.log("🚀 ~ deletePage ~ response:", response);
 
         setNewList(name);
-        /* window.location.reload(); */
+
+        setErrorDelete("");
       } catch (error) {
         console.error("Error deleting Page", error);
         setOpenConfirm(false);
         setErrorDelete(`${name} could not be deleted. Try Again!`);
+        // Clear the error message after 5 seconds
+        setTimeout(() => {
+          setErrorDelete("");
+        }, 5000);
       }
     };
     deletePage();
+    setSelectedPages([]); //clear selection
   };
 
   const handleSearchInput = () => {
@@ -131,59 +137,56 @@ const Page: React.FC = () => {
 
   return (
     <>
-      <div className="w-full h-full overflow-y-scroll relative ">
+      <div className="w-full h-full overflow-y-scroll relative">
         <div
           className={`${
             theme === "dark" ? "text-neutral-300" : "text-dark"
-          } flex flex-col justify-start items-center bg-base-100 h-full`}
+          } flex flex-col justify-start items-center bg-base-200 h-full`}
         >
-          <h2 className="m-3 text-3xl mt-5">List of Pages</h2>
-          {errorDelete && (
-            <div
-              className="w-3/4 alert alert-error text-wraptransition-transform duration-500 transform translate-y-0"
-              role="alert"
-              style={{ transition: "transform 0.5s" }}
-            >
-              {errorDelete}
-            </div>
-          )}
+          {errorDelete && <ErrorMessage errorMessage={errorDelete} />}
+
+          <h2 className="m-3 text-3xl mt-8 text-primary font-semibold">
+            Pages
+          </h2>
+
           <div className="w-3/4 rounded-xl bg-base-100 shadow-md p-3 mb-2">
             <div className="flex justify-between ">
               <div className="flex w-1/2 justify-start items-center relative me-5">
                 <input
                   ref={inputRef}
                   type="text"
-                  className="h-full input input-bordered w-full pl-10 rounded-md"
+                  className="h-full input input-bordered w-full pl-10 rounded-md placeholder-primary placeholder-opacity-50"
                   placeholder="find a page..."
                   onChange={handleSearch}
                 />
                 <button
-                  className="btn btn-link absolute border-none"
+                  className="btn btn-link absolute border-none "
                   onClick={handleSearchInput}
                 >
                   <IoSearchOutline size={20} />
                 </button>
               </div>
-              <Link to="/admin/pages/create" className="btn btn-neutral">
-                <RiStickyNoteAddFill />
+              <Link
+                to="/admin/pages/create"
+                className="flex items-center border border-base-200 rounded-r-md px-2 btn btn-neutral text-primary bg-transparent hover:bg-opacity-30 hover:border-base-300"
+              >
+                <label htmlFor="#createlink" className="cursor-pointer me-2">
+                  Add Page
+                </label>
+                <button id="createlink" className="text-primary text-2xl">
+                  <RiStickyNoteAddFill />
+                </button>
               </Link>
             </div>
           </div>
-          <div className="w-3/4 px-5 ">
-            {/* <PageCards
-              setOpenConfirm={setOpenConfirm}
-              pageList={currentPages}
-              setToDelete={setToDelete}
-            /> */}
-          </div>
 
-          <div className="w-3/4 ">
-            <table className="table w-full">
-              <thead
-                className={`${
-                  theme === "dark" ? "text-neutral-300" : ""
-                } text-xl`}
-              >
+          <div className="w-3/4 bg-base-100 p-2 ">
+            <table
+              className={`table w-full ${
+                theme === "dark" ? "text-neutral-300" : ""
+              }`}
+            >
+              <thead className="text-base">
                 <tr>
                   <th>
                     {selectedPages.length > 0 && (
@@ -234,7 +237,7 @@ const Page: React.FC = () => {
                         </button>
                         <ul
                           tabIndex={1}
-                          className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1"
+                          className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
                         >
                           <li className="w-full">
                             <Link
@@ -272,7 +275,7 @@ const Page: React.FC = () => {
             </table>
             {currentPages.length == 0 && (
               <pre className="w-full h-full flex justify-center items-center">
-                <span className="loading loading-spinner text-info loading-lg"></span>
+                <span className="loading loading-spinner text-primary loading-lg"></span>
               </pre>
             )}
           </div>

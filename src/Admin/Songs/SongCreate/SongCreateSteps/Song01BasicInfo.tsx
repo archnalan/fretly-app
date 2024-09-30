@@ -106,7 +106,7 @@ const Song01BasicInfo: React.FC = () => {
             Next
           </button>
         </div>
-        <pre>{JSON.stringify(watch(), null, 2)}</pre>
+        {/* <pre>{JSON.stringify(watch(), null, 2)}</pre> */}
       </div>
     </div>
   );

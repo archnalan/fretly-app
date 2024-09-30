@@ -206,19 +206,17 @@ const Chord: React.FC = () => {
                   <IoSearchOutline />
                 </button>
               </div>
-              <div className="flex items-center border rounded-r-md ps-2 pe-2 ">
+              <div
+                className={`${listPage.createLinkContainer} cursor-pointer`}
+                onClick={() => setOpenChordCreate(true)}
+              >
                 <label
                   htmlFor="#createlink"
-                  className="btn btn-ghost hover:bg-transparent me-2"
-                  onClick={() => setOpenChordCreate(true)}
+                  className={listPage.createLinkLabel}
                 >
                   Add Chord
                 </label>
-                <button
-                  id="createlink"
-                  className={listPage.createButton}
-                  onClick={() => setOpenChordCreate(true)}
-                >
+                <button id="createlink" className={listPage.createButton}>
                   <RiStickyNoteAddFill />
                 </button>
               </div>

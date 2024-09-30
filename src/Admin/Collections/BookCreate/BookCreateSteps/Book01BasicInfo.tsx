@@ -103,6 +103,13 @@ const Book01BasicInfo: React.FC = () => {
 
         <div className={createPage.buttonContainer}>
           <button
+            onClick={() => navigate(-1)}
+            className={createPage.backButton}
+          >
+            Back
+          </button>
+
+          <button
             className={createPage.saveButton}
             onClick={goToStep2}
             disabled={!valid}
@@ -110,7 +117,8 @@ const Book01BasicInfo: React.FC = () => {
             Next
           </button>
         </div>
-        <pre>{JSON.stringify(watch(), null, 2)}</pre>
+
+        {/*  <pre>{JSON.stringify(watch(), null, 2)}</pre> */}
       </div>
     </div>
   );

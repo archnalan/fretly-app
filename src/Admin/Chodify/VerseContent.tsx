@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { VerseModel } from "../../DataModels/VerseModel";
-import { LineModel } from "../../DataModels/LineModel";
-import { SegmentModel } from "../../DataModels/SegmentModel";
-import { ChordModel } from "../../DataModels/ChordModel";
 import { PayLoadSchema } from "../../DataModels/PayLoad";
-import { VerseContext } from "../../Contexts/VerseContext";
+import { useVerseContext } from "../../Contexts/VerseContext";
 import Verse from "./components/Verse";
+import {
+  getFromLocalStorage,
+  saveToLocalStorage,
+} from "../AdminHelper/TempLocalStorage";
 
 type verseContentType = {
   verse: VerseModel;
@@ -17,9 +18,7 @@ const VerseContent: React.FC<verseContentType> = ({
   verse,
   setInputDisabled,
 }) => {
-  const [lines, setLines] = useState<LineModel[]>([]);
-  const [segments, setSegments] = useState<SegmentModel[]>([]);
-  const [chords, setChords] = useState<ChordModel[]>([]);
+  const { lines, chords, segments } = useVerseContext();
 
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -52,7 +51,9 @@ const VerseContent: React.FC<verseContentType> = ({
         );
       }
 
-      const response = axios.post(
+      saveToLocalStorage("versePayLoad", payload);
+
+      /* const response = axios.post(
         "https://localhost:7077/api/verses/create",
         payload,
         {
@@ -61,12 +62,32 @@ const VerseContent: React.FC<verseContentType> = ({
           },
         }
       );
-
-      console.log("🚀 ~ handleSave ~ response:", response);
+ 
+      console.log("🚀 ~ handleSave ~ response:", response);*/
     } catch (error) {
       console.error("Error Saving verse", error);
     }
   };
+
+  useEffect(() => {
+    const storedPayload = getFromLocalStorage("versePayload");
+
+    if (storedPayload) {
+      const validationResult = PayLoadSchema.safeParse(storedPayload);
+
+      if (validationResult.success) {
+        console.log("🚀 ~ Retrieved and validated payload:", storedPayload);
+        // You can use the retrieved data here if necessary
+      } else {
+        console.error(
+          "🚀 ~ Invalid payload retrieved from local storage:",
+          validationResult.error
+        );
+        // Optionally remove the invalid payload from local storage
+        //localStorage.removeItem("versePayload");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     console.log("🚀 ~ useEffect ~ chords:", chords);
@@ -78,18 +99,11 @@ const VerseContent: React.FC<verseContentType> = ({
 
   return (
     <>
-      <VerseContext.Provider
-        value={{ lines, setLines, segments, setSegments, chords, setChords }}
-      >
-        <div className="w-full h-full flex flex-col justify-between items-center bg-base-200 mb-8">
-          <div className="pb-10">
-            <Verse
-              setInputDisabled={setInputDisabled}
-              handleSave={handleSave}
-            />
-          </div>
+      <div className="w-full h-full flex flex-col justify-between items-center">
+        <div className="pb-3">
+          <Verse setInputDisabled={setInputDisabled} handleSave={handleSave} />
         </div>
-      </VerseContext.Provider>
+      </div>
     </>
   );
 };

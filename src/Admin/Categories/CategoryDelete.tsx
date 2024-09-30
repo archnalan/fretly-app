@@ -1,16 +1,15 @@
 import React from "react";
 import { confirmDelete } from "../SharedClassNames/ConfirmDelete";
 import { useThemeContext } from "../../Contexts/ThemeContext";
+import { CategoryModel } from "../../DataModels/CategoryModel";
 
 type popUPMessage = {
-  title: string;
-  categoryId: number;
+  todelete: CategoryModel[];
   handleDelete: (name: string, id: number) => void;
   setOpenConfirm: React.Dispatch<React.SetStateAction<boolean>>;
 };
 const CategoryDelete: React.FC<popUPMessage> = ({
-  title,
-  categoryId,
+  todelete,
   handleDelete,
   setOpenConfirm,
 }) => {
@@ -29,7 +28,24 @@ const CategoryDelete: React.FC<popUPMessage> = ({
           </button>
         </div>
         <p className={confirmDelete.message}>
-          Do you want to delete the category <strong>{title}</strong>?
+          <span>
+            Do you want to delete the categor
+            {todelete.length > 1 ? "ies " : "y "}
+          </span>
+          <strong>
+            {todelete.length === 1 ? (
+              <span>{todelete[0].name}</span>
+            ) : (
+              todelete.map((category, index) => (
+                <span key={category.id}>
+                  {category.name}
+                  {index < todelete.length - 2 ? ", " : ""}
+                  {index === todelete.length - 2 ? " and " : ""}
+                </span>
+              ))
+            )}
+          </strong>
+          ?
         </p>
         <div className={confirmDelete.buttonContainer}>
           <button
@@ -41,7 +57,9 @@ const CategoryDelete: React.FC<popUPMessage> = ({
           <button
             className={confirmDelete.yesButton}
             onClick={() => {
-              handleDelete(title, categoryId);
+              todelete.map((category) =>
+                handleDelete(category.name, category.id)
+              );
               setOpenConfirm(false);
             }}
           >

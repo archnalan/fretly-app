@@ -91,7 +91,7 @@ const ChartDetails: React.FC = () => {
   return (
     <div className={detailsPage.container}>
       <div className={detailsPage.innerContainer(theme)}>
-        <div className="flex items-center">
+        <div className={detailsPage.revertContainer}>
           <button
             onClick={() => navigate(-1)}
             className={detailsPage.backHeaderButton}

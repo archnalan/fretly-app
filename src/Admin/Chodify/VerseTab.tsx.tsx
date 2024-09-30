@@ -3,6 +3,7 @@ import VerseContent from "./VerseContent";
 import { VerseModel } from "../../DataModels/VerseModel";
 import { IoCloseSharp } from "react-icons/io5";
 import { IoMdAdd } from "react-icons/io";
+import Verse from "./components/Verse";
 
 type verseTabType = {
   verses: VerseModel[];

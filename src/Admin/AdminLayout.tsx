@@ -20,10 +20,10 @@ const AdminLayout: React.FC = () => {
       value={{ expanded, setExpanded, active, setActive }}
     >
       <div className="flex flex-col h-screen">
-        <div className="w-full z-100">
+        {/* <div className="w-full z-100">
           <Navbar />
           <hr className={lineClass} />
-        </div>
+        </div> */}
         <div className="flex flex-1 overflow-hidden">
           <div
             className={`h-full transition-width duration-300 z-50 ${

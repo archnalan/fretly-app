@@ -69,17 +69,16 @@ const CategoryDetails: React.FC = () => {
   return (
     <div className={detailsPage.container}>
       <div className={detailsPage.innerContainer(theme)}>
-        <div className="flex items-center">
+        <div className={detailsPage.revertContainer}>
           <button
             onClick={() => navigate(-1)}
-            className={detailsPage.backHeaderButton}
+            className={detailsPage.revertButton}
           >
             <IoMdArrowRoundBack />
           </button>
-          <h3 className={detailsPage.header}>
-            <strong>Category Details</strong>
-          </h3>
+          <h2 className={detailsPage.header}>Category Details</h2>
         </div>
+
         <div className={detailsPage.detailRow}>
           <strong>Name</strong>
           <span>{category.name}</span>

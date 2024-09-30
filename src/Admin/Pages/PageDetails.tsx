@@ -56,12 +56,12 @@ const PageDetails: React.FC = () => {
           theme === "dark" ? "text-neutral-200" : "text-dark"
         } w-1/2 border bg-base-100 px-5 pt-3 pb-3 rounded-xl mt-[5rem] shadow-xl`}
       >
-        <div className="flex items-center">
-          <button onClick={() => navigate(-1)} className="">
+        <div className="flex items-center text-primary">
+          <button onClick={() => navigate(-1)} className="text-xl me-2">
             <IoMdArrowRoundBack />
           </button>
-          <h3 className="">
-            <strong>Chord chart Details</strong>
+          <h3 className="text-2xl">
+            <strong>Page Details</strong>
           </h3>
         </div>
 

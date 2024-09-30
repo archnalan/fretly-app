@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import LyricLine from "./LyricLine";
-import { LuArrowUpLeftSquare } from "react-icons/lu";
-import { MdCancelPresentation } from "react-icons/md";
 import { useVerseContext } from "../../../Contexts/VerseContext";
 import { LineModel } from "../../../DataModels/LineModel";
+import LineEdit from "./LineEdit";
 
 interface VerseProps {
   setInputDisabled: React.Dispatch<React.SetStateAction<boolean>>;
@@ -77,34 +76,16 @@ const Verse: React.FC<VerseProps> = ({ setInputDisabled, handleSave }) => {
 
   return (
     <div className="w-full">
-      <div>
+      <div className="w-full">
         {lines.map((line, index) => (
           <div className="mb-2" key={index}>
             {lineToEdit && lineToEdit.lyricLineOrder === line.lyricLineOrder ? (
-              <div className="flex items-center">
-                {/* <Chord /> */}
-                <form
-                  onSubmit={handleEditChanges}
-                  className="flex items-center space-x-2"
-                >
-                  <input
-                    ref={editInput}
-                    value={lineToEdit.lineLyrics}
-                    onChange={handleEditOnChange}
-                    placeholder="Enter lyric line here..."
-                    className="w-full border border-gray-300 rounded p-2"
-                  />
-                  <button type="submit" className="text-blue-500">
-                    <LuArrowUpLeftSquare />
-                  </button>
-                  <span
-                    className="text-red-500 cursor-pointer"
-                    onClick={handleEditCancel}
-                  >
-                    <MdCancelPresentation />
-                  </span>
-                </form>
-              </div>
+              <LineEdit
+                lineToEdit={lineToEdit}
+                handleEditCancel={handleEditCancel}
+                handleEditChanges={handleEditChanges}
+                handleEditOnChange={handleEditOnChange}
+              />
             ) : (
               <LyricLine
                 key={index}
@@ -120,16 +101,16 @@ const Verse: React.FC<VerseProps> = ({ setInputDisabled, handleSave }) => {
         ))}
       </div>
       {lines.length !== 0 && (
-        <div className="flex space-x-2 mt-4">
+        <div className="flex justify-end space-x-2 mt-[3rem]">
           <button
-            className="bg-green-500 text-white rounded px-4 py-2"
+            className="bg-success text-white rounded px-4 py-2"
             onClick={handleSave}
             disabled={lineToEdit !== null}
           >
             Save
           </button>
           <button
-            className="bg-red-500 text-white rounded px-4 py-2"
+            className="bg-error text-white rounded px-4 py-2"
             onClick={() => {
               setLines([]);
               setInputDisabled(false);

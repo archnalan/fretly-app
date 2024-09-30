@@ -10,6 +10,9 @@ import SongTitle from "./SongTitle";
 import VerseTabs from "./VerseTab.tsx";
 import { TbEdit } from "react-icons/tb";
 import { useThemeContext } from "../../Contexts/ThemeContext.ts";
+import { useNavigate } from "react-router-dom";
+import { getFromLocalStorage } from "../AdminHelper/TempLocalStorage.ts";
+import { PayLoadSchema } from "../../DataModels/PayLoad.ts";
 
 const Chordify: React.FC = () => {
   const [inputVerse, setInputVerse] = useState<VerseModel>({
@@ -26,6 +29,8 @@ const Chordify: React.FC = () => {
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState(1);
   const { theme } = useThemeContext();
+
+  const navigate = useNavigate();
 
   const handleVerse = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,6 +51,26 @@ const Chordify: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const storedPayload = getFromLocalStorage("versePayload");
+
+    if (storedPayload) {
+      const validationResult = PayLoadSchema.safeParse(storedPayload);
+
+      if (validationResult.success) {
+        console.log("🚀 ~ Retrieved and validated payload:", storedPayload);
+        // You can use the retrieved data here if necessary
+      } else {
+        console.error(
+          "🚀 ~ Invalid payload retrieved from local storage:",
+          validationResult.error
+        );
+        // Optionally remove the invalid payload from local storage
+        //localStorage.removeItem("versePayload");
+      }
+    }
+  }, []);
+
   return (
     <>
       <VerseContext.Provider
@@ -60,19 +85,26 @@ const Chordify: React.FC = () => {
           setInputDisabled,
         }}
       >
-        <div className="w-full h-full bg-base-200 mb-8 ps-5 ">
+        <div className="w-full h-full bg-base-200 px-5 overflow-y-scroll">
           <div
             className={`${
               theme === "dark" ? "" : "text-dark-"
-            } flex flex-col justify-between items-start `}
+            } flex flex-col justify-between items-start mx-2`}
           >
-            <div className="ms-5">
-              <div className="flex items-center mb-4">
-                <button className="btn btn-ghost hover:bg-transparent ">
-                  <TbEdit size={30} />
-                </button>
+            <div className="w-full ms-5 me-5">
+              <div className="flex items-center mb-4 z-1">
+                <div className="tooltip tooltip-bottom" data-tip="add song">
+                  <button
+                    className="btn btn-ghost hover:bg-transparent "
+                    /* onClick={navigate("/admin/songs/create/step1")} */
+                  >
+                    <TbEdit size={30} />
+                  </button>
+                </div>
                 <SongTitle setVerse={setInputVerse} />
               </div>
+            </div>
+            <div className="w-full z-0">
               <VerseTabs
                 verses={verses}
                 activeTab={activeTab}

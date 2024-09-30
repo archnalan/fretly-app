@@ -71,27 +71,38 @@ const LyricLine: React.FC<Props> = ({
     addInput();
   };
   return (
-    <div className="flex">
+    <div className="flex items-center">
       <div className="flex-1 flex mb-[1rem]">
         {lineSegments.map((segment, index) => (
           <LyricSegment key={index} segment={segment} />
         ))}
       </div>
-      <div className="flex items-end border-gray-400">
-        <span className="mr-[1rem] cursor-pointer">
-          <CiEdit onClick={handleEdit} />
-        </span>
-        <span className="cursor-pointer mr-[1rem]" onClick={handleDelete}>
-          <MdOutlineDelete />
-        </span>
-        <span
-          className="cursor-pointer"
-          onClick={() => {
-            handleInputAdd;
-          }}
-        >
-          <TbPlaylistAdd />
-        </span>
+      <div className="flex  border-gray-400">
+        <div className="mr-[1rem] tooltip" data-tip="add">
+          <button
+            type="button"
+            className="cursor-pointer text-primary "
+            onClick={() => {
+              handleInputAdd;
+            }}
+          >
+            <TbPlaylistAdd size={20} />
+          </button>
+        </div>
+        <div className="mr-[1rem] tooltip" data-tip="edit">
+          <button type="button" className="cursor-pointer text-success">
+            <CiEdit onClick={handleEdit} size={20} />
+          </button>
+        </div>
+        <div className="tooltip" data-tip="delete">
+          <button
+            type="button"
+            className="cursor-pointer text-error"
+            onClick={handleDelete}
+          >
+            <MdOutlineDelete size={20} />
+          </button>
+        </div>
       </div>
     </div>
   );

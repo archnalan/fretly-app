@@ -12,6 +12,7 @@ import PageRequest from "../../../API/PageRequest";
 import { Link, useNavigate } from "react-router-dom";
 import { useThemeContext } from "../../../Contexts/ThemeContext";
 import axios from "axios";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const PageCreate: React.FC = () => {
   const {
@@ -61,13 +62,20 @@ const PageCreate: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-center relative bg-base-200 z-0">
+    <div className="w-full h-full flex justify-center items-start relative bg-base-200 z-0">
       <div
         className={`${
           theme === "dark" ? "text-neutral-300" : "text-dark"
-        } w-1/2 border bg-base-100 shadow-lg px-5 pt-3 pb-5 rounded-xl `}
+        } w-1/2 border bg-base-100 px-5 pt-3 pb-5 rounded-xl mt-[5rem] shadow-xl `}
       >
-        <h1 className="text-2xl font-bold mt-4 mb-4">Create a Page</h1>
+        <div className="flex items-center text-primary">
+          <button onClick={() => navigate(-1)} className="text-xl me-2">
+            <IoMdArrowRoundBack />
+          </button>
+          <h1 className="text-2xl font-semibold mt-4 mb-4 text-primary">
+            Create a Page
+          </h1>
+        </div>
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-4 flex justify-between">
@@ -109,11 +117,14 @@ const PageCreate: React.FC = () => {
 
             {/* <pre>{JSON.stringify(watch(), null, 2)}</pre> */}
             <div className="flex justify-end mb-5">
-              <Link to="/admin/pages">
-                <button type="button" className="btn btn-error me-2">
-                  Back
-                </button>
-              </Link>
+              <button
+                type="button"
+                className="btn btn-error me-2"
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </button>
+
               <button
                 type="submit"
                 className="btn btn-primary px-4"

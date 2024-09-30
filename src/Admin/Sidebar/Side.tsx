@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ImBooks } from "react-icons/im";
 import { MdLibraryBooks } from "react-icons/md";
-import { BiSolidCategoryAlt } from "react-icons/bi";
+import { BiSolidCategoryAlt, BiSolidDashboard } from "react-icons/bi";
 import { SiApplemusic } from "react-icons/si";
 import { GiMusicalScore } from "react-icons/gi";
 import { SiMusicbrainz } from "react-icons/si";
@@ -14,6 +14,11 @@ import { BsGrid3X3 } from "react-icons/bs";
 
 const Side: React.FC = () => {
   const sidebarItems = [
+    {
+      text: "Dashboard",
+      slug: "dashboard",
+      icon: <BiSolidDashboard size={30} />,
+    },
     {
       text: "chordify",
       slug: "chordify",

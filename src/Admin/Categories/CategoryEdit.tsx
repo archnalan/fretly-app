@@ -8,6 +8,7 @@ import CategoryRequest from "../../API/CategoryRequest";
 import CategoryEditSuccess from "./CategoryEditSuccess";
 import { editPage } from "../SharedClassNames/editPage";
 import { useThemeContext } from "../../Contexts/ThemeContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const CategoryEdit: React.FC = () => {
   const {
@@ -112,7 +113,15 @@ const CategoryEdit: React.FC = () => {
   return (
     <div className={editPage.container}>
       <div className={editPage.innerContainer(theme)}>
-        <h1 className={editPage.header}>Edit a Category</h1>
+        <div className={editPage.revertContainer}>
+          <button
+            onClick={() => navigate(-1)}
+            className={editPage.revertButton}
+          >
+            <IoMdArrowRoundBack />
+          </button>
+          <h2 className={editPage.header}>Edit Category</h2>
+        </div>
 
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>

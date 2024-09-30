@@ -15,7 +15,7 @@ const SongCreated: React.FC<popUPMessage> = ({ setIsSongCreated }) => {
   const { theme } = useThemeContext();
 
   return (
-    <div className={SuccessPopup.overlay}>
+    <div className={SuccessPopup.overlay(theme)}>
       <div className={SuccessPopup.container(theme)}>
         <div className={SuccessPopup.header}>
           <div></div>
@@ -32,7 +32,7 @@ const SongCreated: React.FC<popUPMessage> = ({ setIsSongCreated }) => {
         <p className={SuccessPopup.message}>
           Song <strong>{songData.title}</strong> has been created successfully!
         </p>
-        <div>
+        <div className={SuccessPopup.buttonContainer}>
           <button
             className={SuccessPopup.okButton}
             onClick={() => {
@@ -41,7 +41,7 @@ const SongCreated: React.FC<popUPMessage> = ({ setIsSongCreated }) => {
               () => setIsSongCreated(false);
             }}
           >
-            Ok
+            Done
           </button>
         </div>
       </div>

@@ -136,71 +136,82 @@ const ChartList: React.FC = () => {
                   className={listPage.searchButton}
                   onClick={handleRefInput}
                 >
-                  <IoSearchOutline />
+                  <IoSearchOutline size={20} />
                 </button>
               </div>
               <Link
                 to="/admin/chordcharts/create"
-                className={listPage.createButton}
+                className={listPage.createLinkContainer}
               >
-                <RiStickyNoteAddFill />
+                <label
+                  htmlFor="#createlink"
+                  className={listPage.createLinkLabel}
+                >
+                  Add Chart
+                </label>
+                <button id="createlink" className={listPage.createButton}>
+                  <RiStickyNoteAddFill />
+                </button>
               </Link>
             </div>
-
-            <div className="grid grid-cols-4 gap-4">
-              {currentCharts.map((chart, index) => (
-                <div className="card" key={index}>
-                  <figure>
-                    <img
-                      src={chart.filePath}
-                      alt={chart.filePath}
-                      className="w-full img-thumbnail"
-                      style={{
-                        backgroundColor: `${theme === "dark" ? "white" : ""}`,
-                        maxHeight: "15em",
-                        maxWidth: "10em",
-                        borderRadius: "0.5em",
-                      }}
-                    />
-                  </figure>
-                  <div className="card-body">
-                    <h5 className="card-title">Fret: {chart.fretPosition}</h5>
-                    <p className="card-text">
-                      {chart.positionDescription &&
-                      chart.positionDescription.length > 25
-                        ? `${chart.positionDescription.slice(0, 25)}...`
-                        : chart.positionDescription}
-                    </p>
-                  </div>
-                  <div className="card-actions justify-center">
-                    <Link to={`${chart.id}`} className="btn btn-sm btn-success">
-                      <FiList />
-                    </Link>
-                    <Link
-                      to={`edit/${chart.id}`}
-                      className="btn btn-sm btn-primary"
-                    >
-                      <FiEdit />
-                    </Link>
-                    <button
-                      className="btn btn-sm btn-error"
-                      onClick={() => {
-                        setToDelete(chart);
-                        setOpenConfirm(true);
-                      }}
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {currentCharts.length == 0 && (
-              <pre className={listPage.spinnerPreview}>
-                <span className={listPage.spinnerSpan}></span>
-              </pre>
-            )}
           </div>
+
+          <div className="w-3/4 grid grid-cols-1 md:grid-cols-4 gap-4 mt-[2rem] ">
+            {currentCharts.map((chart, index) => (
+              <div className="card" key={index}>
+                <figure>
+                  <img
+                    src={chart.filePath}
+                    alt={chart.filePath}
+                    className="w-full img-thumbnail bg-base-100"
+                    style={{
+                      backgroundColor: `${theme === "dark" ? "#ddd" : ""}`,
+                      maxHeight: "15em",
+                      maxWidth: "10em",
+                      borderRadius: "0.5em",
+                    }}
+                  />
+                </figure>
+                <div className="card-actions justify-center mt-[1rem]">
+                  <Link
+                    to={`${chart.id}`}
+                    className="btn btn-sm btn-success me-2"
+                  >
+                    <FiList />
+                  </Link>
+                  <Link
+                    to={`edit/${chart.id}`}
+                    className="btn btn-sm btn-primary me-2"
+                  >
+                    <FiEdit />
+                  </Link>
+                  <button
+                    className="btn btn-sm btn-error"
+                    onClick={() => {
+                      setToDelete(chart);
+                      setOpenConfirm(true);
+                    }}
+                  >
+                    <FiTrash2 />
+                  </button>
+                </div>
+                <div className="card-body">
+                  <h5 className="card-title">Fret: {chart.fretPosition}</h5>
+                  <p className="card-text">
+                    {chart.positionDescription &&
+                    chart.positionDescription.length > 25
+                      ? `${chart.positionDescription.slice(0, 45)}...`
+                      : chart.positionDescription}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {currentCharts.length == 0 && (
+            <pre className={listPage.spinnerPreview}>
+              <span className={listPage.spinnerSpan}></span>
+            </pre>
+          )}
           <div className={listPage.paginationContainer}>
             <Pagination pageCount={pageCount} onPageChange={handlePageChange} />
           </div>

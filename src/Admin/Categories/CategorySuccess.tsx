@@ -15,7 +15,7 @@ const CategoryCreated: React.FC<popUPMessage> = ({
   const { theme } = useThemeContext();
 
   return (
-    <div className={SuccessPopup.overlay}>
+    <div className={SuccessPopup.overlay(theme)}>
       <div className={SuccessPopup.container(theme)}>
         <div className={SuccessPopup.header}>
           <div></div>

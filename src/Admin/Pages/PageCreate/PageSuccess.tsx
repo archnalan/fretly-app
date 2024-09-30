@@ -11,10 +11,14 @@ const PageSuccess: React.FC<popUPMessage> = ({ pageTitle, setOpenSuccess }) => {
   const { theme } = useThemeContext();
 
   return (
-    <div className="w-full h-full flex justify-center items-center fixed bg-gray-500 bg-opacity-50">
+    <div
+      className={`${
+        theme === "dark" ? "bg-gray-500 " : "bg-gray-700 "
+      } w-full h-screen flex justify-center items-center fixed bg-opacity-30 z-100`}
+    >
       <div
         className={`w-1/2 flex flex-col relative border bg-base-100 shadow-xl px-5 pt-3 rounded-xl ${
-          theme === "dark" ? "border-stone-800 text-slate-300" : ""
+          theme === "dark" ? "border-stone-900 text-slate-300" : ""
         }`}
       >
         <div className="w-full flex absolute justify-between top-0 pr-5">
@@ -23,7 +27,7 @@ const PageSuccess: React.FC<popUPMessage> = ({ pageTitle, setOpenSuccess }) => {
             className="btn btn-outline border-none rounded-full bg-none hover:bg-opacity-0 "
             onClick={() => {
               setOpenSuccess(false);
-              navigate("/admin/pages");
+              navigate(-1);
             }}
           >
             <span className="text-2xl text-error">&times;</span>

@@ -8,6 +8,7 @@ import PageEditSuccess from "./PageEditSuccess";
 import { idSchema } from "../../../DataModels/ValidatedID";
 import classNames from "classnames";
 import { useThemeContext } from "../../../Contexts/ThemeContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const PageEdit: React.FC = () => {
   const {
@@ -89,14 +90,18 @@ const PageEdit: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full h-full justify-center items-center bg-base-200 ">
+    <div className="flex w-full h-full justify-center items-start bg-base-200 ">
       <div
         className={`${
           theme === "dark" ? "text-neutral-300" : "text-dark"
-        } w-1/2 border bg-base-100 shadow-lg px-5 pt-3 pb-5 rounded-xl`}
+        } w-1/2 border bg-base-100 shadow-xl px-5 pt-3 pb-5 mt-[5rem] rounded-xl`}
       >
-        <h1 className="text-3xl mt-5 mb-5">Edit a Page</h1>
-
+        <div className="flex items-center text-primary">
+          <button onClick={() => navigate(-1)} className="text-xl me-2">
+            <IoMdArrowRoundBack />
+          </button>
+          <h1 className="text-2xl font-semibold mt-5 mb-5">Edit a Page</h1>
+        </div>
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-4 flex justify-between">

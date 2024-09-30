@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { RiStickyNoteAddFill } from "react-icons/ri";
+import { RiMoreFill, RiStickyNoteAddFill } from "react-icons/ri";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiList, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
@@ -11,6 +11,7 @@ import CategoryDelete from "./CategoryDelete";
 import { listPage } from "../SharedClassNames/ListPage";
 import { useThemeContext } from "../../Contexts/ThemeContext";
 import "./alertDiv.css";
+import ErrorMessage from "../AdminHelper/ErrorMessage";
 
 const Category: React.FC = () => {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
@@ -18,11 +19,12 @@ const Category: React.FC = () => {
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
   const [newList, setNewList] = useState("");
   const [errorDelete, setErrorDelete] = useState<string>("");
-  const [toDelete, setToDelete] = useState<CategoryModel | undefined>(
-    undefined
+  const [toDelete, setToDelete] = useState<CategoryModel[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryModel[]>(
+    []
   );
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [categoriesPerPage] = useState(7);
+  const [categoriesPerPage] = useState(6);
   const location = useLocation();
   const navigate = useNavigate();
   const { theme } = useThemeContext();
@@ -102,7 +104,7 @@ const Category: React.FC = () => {
         console.log("🚀 ~ deleteCategory ~ response:", response);
 
         setNewList(name);
-        /*  window.location.reload(); */
+        setSelectedCategories([]);
       } catch (error) {
         console.error("Error deleting Category", error);
         setOpenConfirm(false);
@@ -115,6 +117,14 @@ const Category: React.FC = () => {
       }
     };
     deleteCategory();
+  };
+
+  const handleSelectPage = (page: CategoryModel, isChecked: boolean) => {
+    setSelectedCategories((prevSelectedCategories) =>
+      isChecked
+        ? [...prevSelectedCategories, page]
+        : prevSelectedCategories.filter((p) => p.id !== page.id)
+    );
   };
 
   const handlePageChange = (selected: number) => {
@@ -130,25 +140,17 @@ const Category: React.FC = () => {
   return (
     <div className={listPage.container}>
       <div className={listPage.innerContainer(theme)}>
-        <h1 className={listPage.header}>List of categories</h1>
+        {errorDelete && <ErrorMessage errorMessage={errorDelete} />}
+
+        <h1 className={listPage.header}>categories</h1>
         {successMessage && (
-          <div className={listPage.successAlert} role="alert">
-            {successMessage}
+          <div className={listPage.toastContainer}>
+            <div className={listPage.toastDiv}>
+              <span>{successMessage}</span>
+            </div>
           </div>
         )}
-        {errorDelete && (
-          <div
-            className={listPage.errorAlert}
-            style={{
-              animation: errorDelete
-                ? "slideOut 0.2s ease 2.8s forwards"
-                : "none",
-            }}
-            role="alert"
-          >
-            {errorDelete}
-          </div>
-        )}
+
         <div className={listPage.contentContainer}>
           <div className={listPage.searchContainer}>
             <div className={listPage.searchInputContainer}>
@@ -159,76 +161,127 @@ const Category: React.FC = () => {
                 onChange={handleSearch}
               />
               <button className={listPage.searchButton}>
-                <IoSearchOutline />
+                <IoSearchOutline size={20} />
               </button>
             </div>
             <Link
               to="/admin/categories/create"
-              className={listPage.createButton}
+              className={listPage.createLinkContainer}
             >
-              <RiStickyNoteAddFill />
+              <label htmlFor="#createlink" className={listPage.createLinkLabel}>
+                Add Category
+              </label>
+              <button id="createlink" className={listPage.createButton}>
+                <RiStickyNoteAddFill />
+              </button>
             </Link>
           </div>
-          <div className={listPage.tableContainer}>
-            <table className={listPage.table}>
-              <thead className={listPage.tableHeader(theme)}>
-                <tr>
-                  <td className="col-number">ID</td>
-                  <td className="col-title">Name</td>
-                  <td className="col-category">Category-slug</td>
-                  <td className="col-author">Sorting</td>
-                  <td className="col-actions">Actions</td>
-                </tr>
-              </thead>
-
-              <tbody className="table-group-divider">
-                {currentCategories.map((category) => (
-                  <tr key={category.id}>
-                    <td>{String(category.id).padStart(3, "0")}</td>
-                    <td>{category.name}</td>
-                    <td>{category.categorySlug}</td>
-                    <td>{category.sorting}</td>
-                    <td>
-                      <Link
-                        to={`${category.id}`}
-                        className={listPage.detailsButton}
-                      >
-                        <FiList />
-                      </Link>
-                      <Link
-                        to={`edit/${category.id}`}
-                        className={listPage.editButton}
-                      >
-                        <FiEdit />
-                      </Link>
-                      <button
-                        className={listPage.deleteButton}
-                        onClick={() => {
-                          setToDelete(category);
-                          setOpenConfirm(true);
-                        }}
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {currentCategories.length == 0 && (
-              <pre className={listPage.spinnerPreview}>
-                <span className={listPage.spinnerSpan}></span>
-              </pre>
-            )}
-          </div>
         </div>
+        <div className={listPage.tableContainer}>
+          <table className={listPage.table(theme)}>
+            <thead className={listPage.tableHead}>
+              <tr>
+                <th>
+                  {selectedCategories.length > 0 && (
+                    <button
+                      className="btn btn-error btn-sm"
+                      onClick={() => {
+                        setToDelete(selectedCategories);
+                        setOpenConfirm(true);
+                      }}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  )}
+                </th>
+                <th className="col-number">ID</th>
+                <th className="col-title">Name</th>
+                <th className="col-category">Category-slug</th>
+                <th className="col-author">Sorting</th>
+                <th className="col-actions">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="table-group-divider">
+              {currentCategories.map((category) => (
+                <tr key={category.id}>
+                  <td>
+                    <label>
+                      <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={selectedCategories.some(
+                          (p) => p.id === category.id
+                        )}
+                        onChange={(e) =>
+                          handleSelectPage(category, e.target.checked)
+                        }
+                      />
+                    </label>
+                  </td>
+                  <td>{String(category.id).padStart(3, "0")}</td>
+                  <td>{category.name}</td>
+                  <td>{category.categorySlug}</td>
+                  <td>{category.sorting}</td>
+                  <td>
+                    <div className={listPage.dropdownContainer}>
+                      <button
+                        tabIndex={0}
+                        className={listPage.dropdownActionButton}
+                      >
+                        <RiMoreFill size={24} />
+                      </button>
+                      <ul
+                        tabIndex={1}
+                        className={listPage.dropdownListContainter}
+                      >
+                        <li className="w-full">
+                          <Link
+                            to={`${category.id}`}
+                            className={listPage.detailsButton}
+                          >
+                            <FiList className="mr-2" /> Details
+                          </Link>
+                        </li>
+                        <li className="w-full">
+                          <Link
+                            to={`edit/${category.id}`}
+                            className={listPage.editButton}
+                          >
+                            <FiEdit className="mr-2" /> Edit
+                          </Link>
+                        </li>
+                        <li className="w-full">
+                          <button
+                            className={listPage.deleteButton}
+                            onClick={() => {
+                              setToDelete([...toDelete, category]);
+                              setOpenConfirm(true);
+                            }}
+                          >
+                            <FiTrash2 className="mr-2" /> Delete
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {currentCategories.length == 0 && (
+            <pre className={listPage.spinnerPreview}>
+              <span className={listPage.spinnerSpan}></span>
+            </pre>
+          )}
+        </div>
+
         <div className={listPage.paginationContainer}>
           <Pagination pageCount={pageCount} onPageChange={handlePageChange} />
         </div>
         {openConfirm && toDelete && (
           <CategoryDelete
-            title={toDelete.name}
-            categoryId={toDelete.id}
+            todelete={toDelete}
             setOpenConfirm={setOpenConfirm}
             handleDelete={handleDelete}
           />

@@ -16,17 +16,21 @@ const PageEditSuccess: React.FC<popUPMessage> = ({
   return (
     <div
       className={`${
-        theme === "dark" ? "bg-base-100" : "bg-gray-500"
-      } w-full h-screen flex justify-center items-center fixed bg-opacity-90 z-100`}
+        theme === "dark" ? "bg-gray-500 " : "bg-gray-700 "
+      } w-full h-screen flex justify-center items-center fixed bg-opacity-30 z-100`}
     >
-      <div className="w-1/2 flex flex-col relative border bg-base-100 shadow-2xl px-5 pt-3 pd-5 rounded-2xl">
+      <div
+        className={`w-1/2 flex flex-col relative border bg-base-100 shadow-xl px-5 pt-3 rounded-xl ${
+          theme === "dark" ? "border-stone-900 text-slate-300" : ""
+        }`}
+      >
         <div className="w-full flex absolute justify-between top-0 pr-5">
           <div></div>
           <button
             className="btn btn-outline border-none rounded-full bg-none hover:bg-opacity-0"
             onClick={() => {
               setOpenEditSuccess(false);
-              navigate("/admin/pages");
+              navigate(-1);
             }}
           >
             <span className="font-semibold text-2xl text-error">&times;</span>
