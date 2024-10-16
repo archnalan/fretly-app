@@ -10,6 +10,7 @@ import PageDelete from "./PageDelete";
 import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 import Pagination from "../../Helper/Pagination";
 import ErrorMessage from "../AdminHelper/ErrorMessage";
+import ListPageSkeleton from "../AdminHelper/ListPageSkeleton";
 
 const Page: React.FC = () => {
   const [pages, setPages] = useState<PageModel[]>([]);
@@ -20,12 +21,20 @@ const Page: React.FC = () => {
   const [newList, setNewList] = useState("");
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pagesPerPage] = useState(5);
+  const skeletonArray = Array.from({ length: pagesPerPage });
   const [selectedPages, setSelectedPages] = useState<PageModel[]>([]);
 
   const [filteredPages, setfilteredPages] = useState<PageModel[]>([]);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const tableHead = [
+    { th: "Title", className: "col-title" },
+    { th: "Content", className: "col-content" },
+    { th: "Sorting", className: "col-sorting" },
+    { th: "Actions", className: "col-actions" },
+  ];
+  const tableSkeletons = [...tableHead, { th: "ID" }];
   useEffect(() => {
     const getPages = async () => {
       try {
@@ -84,6 +93,7 @@ const Page: React.FC = () => {
             page.slug?.toLowerCase().includes(searchQuery) ||
             page.content.toLowerCase().includes(searchQuery)
         );
+
         setfilteredPages(searchResult);
         setCurrentPageIndex(0); //display results on first page
       }
@@ -202,81 +212,97 @@ const Page: React.FC = () => {
                     )}
                   </th>
                   {/* <th className="col-number">ID</th> */}
-                  <th className="col-title">Title</th>
-                  <th className="col-category">Content</th>
-                  <th className="col-author">Sorting</th>
-                  <th className="col-actions">Actions</th>
+
+                  {tableHead.map((header, index) => (
+                    <th key={index} className={header.className}>
+                      {header.th}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {currentPages.map((page) => (
-                  <tr key={page.id} className="items-center">
-                    <td>
-                      <label>
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={selectedPages.some((p) => p.id === page.id)}
-                          onChange={(e) =>
-                            handleSelectPage(page, e.target.checked)
-                          }
-                        />
-                      </label>
-                    </td>
-                    {/* <td>{String(page.id).padStart(3, "0")}</td> */}
-                    <td>{page.title}</td>
-                    <td>{page.content}</td>
-                    <td>{page.sorting}</td>
-                    <td>
-                      <div className="dropdown dropdown-right ">
-                        <button
-                          tabIndex={0}
-                          className="btn btn-ghost btn-circle"
-                        >
-                          <RiMoreFill size={24} />
-                        </button>
-                        <ul
-                          tabIndex={1}
-                          className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
-                        >
-                          <li className="w-full">
-                            <Link
-                              to={`${page.id}`}
-                              className="me-2 flex items-center"
-                            >
-                              <FiList className="mr-2" /> Details
-                            </Link>
-                          </li>
-                          <li className="w-full">
-                            <Link
-                              to={`edit/${page.id}`}
-                              className="me-2 flex items-center justify-start"
-                            >
-                              <FiEdit className="mr-2" /> Edit
-                            </Link>
-                          </li>
-                          <li className="w-full">
+                {currentPages.length === 0
+                  ? skeletonArray.map((_, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {tableSkeletons.map((_, colIndex) => (
+                          <td key={colIndex} className="items-center">
+                            <div className="skeleton w-full h-[1.5rem]  px-[0.25rem] border-none my-[0.5rem] "></div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  : currentPages.map((page) => (
+                      <tr key={page.id} className="items-center">
+                        <td>
+                          <label>
+                            <input
+                              type="checkbox"
+                              className="checkbox"
+                              checked={selectedPages.some(
+                                (p) => p.id === page.id
+                              )}
+                              onChange={(e) =>
+                                handleSelectPage(page, e.target.checked)
+                              }
+                            />
+                          </label>
+                        </td>
+                        {/* <td>{String(page.id).padStart(3, "0")}</td> */}
+                        <td>{page.title}</td>
+                        <td>{page.content}</td>
+                        <td>{page.sorting}</td>
+                        <td>
+                          <div className="dropdown dropdown-right ">
                             <button
-                              className="btn btn-error btn-sm bg-opacity-75 flex items-center justify-start"
-                              onClick={() => {
-                                setToDelete([...toDelete, page]);
-                                setOpenConfirm(true);
-                              }}
+                              tabIndex={0}
+                              className="btn btn-ghost btn-circle"
                             >
-                              <FiTrash2 className="mr-2" /> Delete
+                              <RiMoreFill size={24} />
                             </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                            <ul
+                              tabIndex={1}
+                              className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
+                            >
+                              <li className="w-full">
+                                <Link
+                                  to={`${page.id}`}
+                                  className="me-2 flex items-center"
+                                >
+                                  <FiList className="mr-2" /> Details
+                                </Link>
+                              </li>
+                              <li className="w-full">
+                                <Link
+                                  to={`edit/${page.id}`}
+                                  className="me-2 flex items-center justify-start"
+                                >
+                                  <FiEdit className="mr-2" /> Edit
+                                </Link>
+                              </li>
+                              <li className="w-full">
+                                <button
+                                  className="btn btn-error btn-sm bg-opacity-75 flex items-center justify-start"
+                                  onClick={() => {
+                                    setToDelete([...toDelete, page]);
+                                    setOpenConfirm(true);
+                                  }}
+                                >
+                                  <FiTrash2 className="mr-2" /> Delete
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
             {currentPages.length == 0 && (
-              <pre className="w-full h-full flex justify-center items-center">
+              <>
+                {/* <pre className="w-full h-full flex justify-center items-center">
                 <span className="loading loading-spinner text-primary loading-lg"></span>
-              </pre>
+              </pre> */}
+              </>
             )}
           </div>
           <div className="flex justify-center fixed bottom-5 bg-base-150 shadow-md rounded-xl border">

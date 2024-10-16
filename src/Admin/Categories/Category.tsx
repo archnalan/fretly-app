@@ -25,6 +25,7 @@ const Category: React.FC = () => {
   );
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [categoriesPerPage] = useState(6);
+  const skeletonArray = Array.from({ length: categoriesPerPage });
   const location = useLocation();
   const navigate = useNavigate();
   const { theme } = useThemeContext();
@@ -32,6 +33,15 @@ const Category: React.FC = () => {
   const [filteredCategories, setfilteredCategories] = useState<CategoryModel[]>(
     []
   );
+
+  const tableHead = [
+    { th: "ID", className: "col-Id" },
+    { th: "Name", className: "col-name" },
+    { th: "Category-slug", className: "col-category-slug" },
+    { th: "Sorting", className: "col-sorting" },
+    { th: "Actions", className: "col-actions" },
+  ];
+  const tableSkeletons = [...tableHead, { th: "check" }];
 
   useEffect(() => {
     const getCategories = async () => {
@@ -194,79 +204,89 @@ const Category: React.FC = () => {
                     </button>
                   )}
                 </th>
-                <th className="col-number">ID</th>
-                <th className="col-title">Name</th>
-                <th className="col-category">Category-slug</th>
-                <th className="col-author">Sorting</th>
-                <th className="col-actions">Actions</th>
+                {tableHead.map((header, index) => (
+                  <th key={index} className={header.className}>
+                    {header.th}
+                  </th>
+                ))}
               </tr>
             </thead>
 
             <tbody className="table-group-divider">
-              {currentCategories.map((category) => (
-                <tr key={category.id}>
-                  <td>
-                    <label>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        checked={selectedCategories.some(
-                          (p) => p.id === category.id
-                        )}
-                        onChange={(e) =>
-                          handleSelectPage(category, e.target.checked)
-                        }
-                      />
-                    </label>
-                  </td>
-                  <td>{String(category.id).padStart(3, "0")}</td>
-                  <td>{category.name}</td>
-                  <td>{category.categorySlug}</td>
-                  <td>{category.sorting}</td>
-                  <td>
-                    <div className={listPage.dropdownContainer}>
-                      <button
-                        tabIndex={0}
-                        className={listPage.dropdownActionButton}
-                      >
-                        <RiMoreFill size={24} />
-                      </button>
-                      <ul
-                        tabIndex={1}
-                        className={listPage.dropdownListContainter}
-                      >
-                        <li className="w-full">
-                          <Link
-                            to={`${category.id}`}
-                            className={listPage.detailsButton}
-                          >
-                            <FiList className="mr-2" /> Details
-                          </Link>
-                        </li>
-                        <li className="w-full">
-                          <Link
-                            to={`edit/${category.id}`}
-                            className={listPage.editButton}
-                          >
-                            <FiEdit className="mr-2" /> Edit
-                          </Link>
-                        </li>
-                        <li className="w-full">
+              {currentCategories.length === 0
+                ? skeletonArray.map((_, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {tableSkeletons.map((_, colIndex) => (
+                        <td key={colIndex} className="items-center">
+                          <div className="skeleton w-full h-[2rem]  px-[0.5rem] border-none my-[0.5rem] "></div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                : currentCategories.map((category) => (
+                    <tr key={category.id}>
+                      <td>
+                        <label>
+                          <input
+                            type="checkbox"
+                            className="checkbox"
+                            checked={selectedCategories.some(
+                              (p) => p.id === category.id
+                            )}
+                            onChange={(e) =>
+                              handleSelectPage(category, e.target.checked)
+                            }
+                          />
+                        </label>
+                      </td>
+                      <td>{String(category.id).padStart(3, "0")}</td>
+                      <td>{category.name}</td>
+                      <td>{category.categorySlug}</td>
+                      <td>{category.sorting}</td>
+                      <td>
+                        <div className={listPage.dropdownContainer}>
                           <button
-                            className={listPage.deleteButton}
-                            onClick={() => {
-                              setToDelete([...toDelete, category]);
-                              setOpenConfirm(true);
-                            }}
+                            tabIndex={0}
+                            className={listPage.dropdownActionButton}
                           >
-                            <FiTrash2 className="mr-2" /> Delete
+                            <RiMoreFill size={24} />
                           </button>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          <ul
+                            tabIndex={1}
+                            className={listPage.dropdownListContainter}
+                          >
+                            <li className="w-full">
+                              <Link
+                                to={`${category.id}`}
+                                className={listPage.detailsButton}
+                              >
+                                <FiList className="mr-2" /> Details
+                              </Link>
+                            </li>
+                            <li className="w-full">
+                              <Link
+                                to={`edit/${category.id}`}
+                                className={listPage.editButton}
+                              >
+                                <FiEdit className="mr-2" /> Edit
+                              </Link>
+                            </li>
+                            <li className="w-full">
+                              <button
+                                className={listPage.deleteButton}
+                                onClick={() => {
+                                  setToDelete([...toDelete, category]);
+                                  setOpenConfirm(true);
+                                }}
+                              >
+                                <FiTrash2 className="mr-2" /> Delete
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
           {currentCategories.length == 0 && (

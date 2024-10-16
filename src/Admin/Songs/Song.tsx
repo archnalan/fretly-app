@@ -25,11 +25,22 @@ const Song: React.FC = () => {
   const [newList, setNewList] = useState("");
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [songsPerPage] = useState(6);
+  const skeletonArray = Array.from({ length: songsPerPage });
   const location = useLocation();
   const navigate = useNavigate();
   const { theme } = useThemeContext();
 
   const [filteredSongs, setfilteredSongs] = useState<SongWithCategory[]>([]);
+
+  const tableHead = [
+    { th: "Number", className: "col-number" },
+    { th: "Title", className: "col-title" },
+    { th: "Category", className: "col-category" },
+    { th: "Author", className: "col-author" },
+    { th: "Actions", className: "col-actions" },
+  ];
+
+  const tableSkeletons = [...tableHead, { th: "ID" }];
 
   useEffect(() => {
     const getSongs = async () => {
@@ -179,73 +190,90 @@ const Song: React.FC = () => {
                     </button>
                   )}
                 </th>
-                <td className="col-number">Number</td>
-                <td className="col-title">Title</td>
-                <td className="col-category">Category</td>
-                <td className="col-author">Author</td>
-                <td className="col-actions">Actions</td>
+                {tableHead.map((header, index) => (
+                  <th key={index} className={header.className}>
+                    {header.th}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="table-group-divider">
-              {currentSongs.map((song) => (
-                <tr key={song.id}>
-                  <td>
-                    <label>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        checked={selectedSongs.some((p) => p.id === song.id)}
-                        onChange={(e) =>
-                          handleSelectSong(song, e.target.checked)
-                        }
-                      />
-                    </label>
-                  </td>
-                  <td>{String(song.number).padStart(3, "0")}</td>
-                  <td>{song.title}</td>
-                  <td>{song.categoryName}</td>
-                  <td>{song.writtenBy}</td>
-                  <td>
-                    <div className="dropdown dropdown-right ">
-                      <button tabIndex={0} className="btn btn-ghost btn-circle">
-                        <RiMoreFill size={24} />
-                      </button>
-                      <ul
-                        tabIndex={1}
-                        className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
-                      >
-                        <li className="w-full">
-                          <Link
-                            to={`${song.id}`}
-                            className={listPage.detailsButton}
-                          >
-                            <FiList className="mr-2" /> Details
-                          </Link>
-                        </li>
-                        <li className="w-full">
-                          <Link
-                            to={`edit/${song.id}`}
-                            className={listPage.editButton}
-                          >
-                            <FiEdit className="mr-2" /> Edit
-                          </Link>
-                        </li>
-                        <li className="w-full">
+              {currentSongs.length === 0
+                ? skeletonArray.map((_, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {tableSkeletons.map((_, colIndex) => (
+                        <td key={colIndex} className="items-center">
+                          <div className={listPage.tableSkelton}></div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                : currentSongs.map((song) => (
+                    <tr key={song.id}>
+                      <td>
+                        <label>
+                          <input
+                            type="checkbox"
+                            className="checkbox"
+                            checked={selectedSongs.some(
+                              (p) => p.id === song.id
+                            )}
+                            onChange={(e) =>
+                              handleSelectSong(song, e.target.checked)
+                            }
+                          />
+                        </label>
+                      </td>
+                      <td>{String(song.number).padStart(3, "0")}</td>
+                      <td>{song.title}</td>
+                      <td>{song.categoryName}</td>
+                      <td>{song.writtenBy}</td>
+                      <td>
+                        <div className={listPage.dropdownContainer}>
                           <button
-                            className={listPage.deleteButton}
-                            onClick={() => {
-                              setToDelete([...toDelete, song]);
-                              setOpenConfirm(true);
-                            }}
+                            tabIndex={0}
+                            className={listPage.dropdownButton}
                           >
-                            <FiTrash2 className="mr-2" /> Delete
+                            <RiMoreFill size={24} />
                           </button>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          <ul
+                            tabIndex={1}
+                            className={listPage.dropdownListContainter}
+                          >
+                            <li className={listPage.liElement}>
+                              <Link
+                                to={`${song.id}`}
+                                className={listPage.detailsButton}
+                              >
+                                <FiList className={listPage.iconStyle} />
+                                Details
+                              </Link>
+                            </li>
+                            <li className={listPage.liElement}>
+                              <Link
+                                to={`edit/${song.id}`}
+                                className={listPage.editButton}
+                              >
+                                <FiEdit className={listPage.iconStyle} /> Edit
+                              </Link>
+                            </li>
+                            <li className={listPage.liElement}>
+                              <button
+                                className={listPage.deleteButton}
+                                onClick={() => {
+                                  setToDelete([...toDelete, song]);
+                                  setOpenConfirm(true);
+                                }}
+                              >
+                                <FiTrash2 className={listPage.iconStyle} />
+                                Delete
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
           {currentSongs.length == 0 && (

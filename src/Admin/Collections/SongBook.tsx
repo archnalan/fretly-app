@@ -20,9 +20,18 @@ const SongBook: React.FC = () => {
   const [bookSearch, setBookSearch] = useState<SongBookModel[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [songsPerPage] = useState(6);
+  const skeletonArray = Array.from({ length: songsPerPage });
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useThemeContext();
+
+  const tableHead = [
+    { th: "Title", className: "col-title" },
+    { th: "Publisher", className: "col-publisher" },
+    { th: "Author", className: "col-author" },
+    { th: "Actions", className: "col-actions" },
+  ];
+  const tableSkeletons = [...tableHead, { th: "ID" }];
 
   useEffect(() => {
     const getSongBooks = async () => {
@@ -177,71 +186,87 @@ const SongBook: React.FC = () => {
                     </button>
                   )}
                 </th>
-                <th className="col-number">Title</th>
-                <th className="col-title">Publisher</th>
-                <th className="col-author">Author</th>
-                <th className="col-actions">Actions</th>
+                {tableHead.map((header, index) => (
+                  <th key={index} className={header.className}>
+                    {header.th}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="table-group-divider">
-              {currentBooks.map((book) => (
-                <tr key={book.id}>
-                  <td>
-                    <label>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        checked={selectedBooks.some((p) => p.id === book.id)}
-                        onChange={(e) =>
-                          handleSelectPage(book, e.target.checked)
-                        }
-                      />
-                    </label>
-                  </td>
-                  <td>{book.title}</td>
-                  <td>{book.publisher}</td>
-                  <td>{book.author}</td>
-                  <td>
-                    <div className="dropdown dropdown-right ">
-                      <button tabIndex={0} className="btn btn-ghost btn-circle">
-                        <RiMoreFill size={24} />
-                      </button>
-                      <ul
-                        tabIndex={1}
-                        className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
-                      >
-                        <li className="w-full">
-                          <Link
-                            to={`${book.id}`}
-                            className={listPage.detailsButton}
-                          >
-                            <FiList className="mr-2" /> Details
-                          </Link>
-                        </li>
-                        <li className="w-full">
-                          <Link
-                            to={`edit/${book.id}`}
-                            className={listPage.editButton}
-                          >
-                            <FiEdit className="mr-2" /> Edit
-                          </Link>
-                        </li>
-                        <li className="w-full">
+              {currentBooks.length === 0
+                ? skeletonArray.map((_, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {tableSkeletons.map((_, colIndex) => (
+                        <td key={colIndex} className="items-center">
+                          <div className="skeleton w-full h-[1.5rem]  px-[0.25rem] border-none my-[0.5rem] "></div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                : currentBooks.map((book) => (
+                    <tr key={book.id}>
+                      <td>
+                        <label>
+                          <input
+                            type="checkbox"
+                            className="checkbox"
+                            checked={selectedBooks.some(
+                              (p) => p.id === book.id
+                            )}
+                            onChange={(e) =>
+                              handleSelectPage(book, e.target.checked)
+                            }
+                          />
+                        </label>
+                      </td>
+                      <td>{book.title}</td>
+                      <td>{book.publisher}</td>
+                      <td>{book.author}</td>
+                      <td>
+                        <div className="dropdown dropdown-right ">
                           <button
-                            className={listPage.deleteButton}
-                            onClick={() => {
-                              setToDelete([...toDelete, book]);
-                              setOpenConfirm(true);
-                            }}
+                            tabIndex={0}
+                            className="btn btn-ghost btn-circle"
                           >
-                            <FiTrash2 className="mr-2" /> Delete
+                            <RiMoreFill size={24} />
                           </button>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          <ul
+                            tabIndex={1}
+                            className="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 shadow absolute right-0 mt-2 z-1 border"
+                          >
+                            <li className="w-full">
+                              <Link
+                                to={`${book.id}`}
+                                className={listPage.detailsButton}
+                              >
+                                <FiList className="mr-2" /> Details
+                              </Link>
+                            </li>
+                            <li className="w-full">
+                              <Link
+                                to={`edit/${book.id}`}
+                                className={listPage.editButton}
+                              >
+                                <FiEdit className="mr-2" /> Edit
+                              </Link>
+                            </li>
+                            <li className="w-full">
+                              <button
+                                className={listPage.deleteButton}
+                                onClick={() => {
+                                  setToDelete([...toDelete, book]);
+                                  setOpenConfirm(true);
+                                }}
+                              >
+                                <FiTrash2 className="mr-2" /> Delete
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
           {currentBooks.length == 0 && (
