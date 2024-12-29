@@ -23,6 +23,7 @@ const Song02AdditInfo: React.FC = () => {
     formState: { errors },
   } = useFormContext<SongCreateModel>();
 
+  const [headerText, setHeaderText] = useState("Create");
   const [categories, setCategories] = useState<CategoryModel[]>([]);
 
   useEffect(() => {
@@ -42,6 +43,7 @@ const Song02AdditInfo: React.FC = () => {
       setCategories(validatedCategories.data);
     };
     fetchCategories();
+    if (watch().id) setHeaderText("Edit");
   }, []);
 
   const navigate = useNavigate();
@@ -69,7 +71,7 @@ const Song02AdditInfo: React.FC = () => {
       </div>
       <div className={createPage.innerContainer(theme)}>
         <div className={createPage.header}>
-          <SongHeader />
+          <SongHeader headText={headerText} />
         </div>
         <div className={createPage.form}>
           <label htmlFor="category" className={createPage.labelRequired}>

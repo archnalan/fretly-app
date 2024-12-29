@@ -16,7 +16,7 @@ export const SongBookSchema = z.object({
   edition: z.string().max(50).optional(),
   language: z.string().max(50),
   addedBy: z.string().optional(),
-  addedTime: z.string()/* .transform((str) => new Date(str)) */,
+  addedTime: z.string().optional()/* .transform((str) => new Date(str)) */,
 });
 
 export type SongBookModel = z.infer<typeof SongBookSchema>;
@@ -27,6 +27,6 @@ export const BookWithCategorySchema = SongBookSchema.extend({
 
 export type BookWithCategory = z.infer<typeof BookWithCategorySchema>;
 
-export const BookCreateSchema = SongBookSchema.omit({id: true});
+export const BookCreateSchema = SongBookSchema.extend({id: z.number().optional(),});
 
 export type SongBookCreateModel = z.infer<typeof BookCreateSchema>;

@@ -1,5 +1,5 @@
-import React from "react";
-import { useFormContext } from "react-hook-form";
+import React, { useState } from "react";
+import { SubmitHandler, UseFormReturn, useFormContext } from "react-hook-form";
 import BookHeader from "../SharedSections/BookHeader";
 import { useNavigate } from "react-router-dom";
 import { detailsPage } from "../../../SharedClassNames/detailsPage";
@@ -7,17 +7,25 @@ import { useThemeContext } from "../../../../Contexts/ThemeContext";
 import { createPage } from "../../../SharedClassNames/createPage";
 import BookProgressbar from "../BookProgressbar";
 import { SongBookCreateModel } from "../../../../DataModels/SongBookModel";
+import { getCurrentTimeString } from "../../../AdminHelper/CurrentTime";
+import BookCollectionSuccess from "../../BookCollectionSuccess";
+import BookRequest from "../../../../API/BookRequest";
+import axios from "axios";
 
 type reviewProps = {
-  onSubmit: () => void;
+  methods: UseFormReturn<SongBookCreateModel>;
 };
-const Book05Review: React.FC<reviewProps> = ({ onSubmit }) => {
+const Book05Review: React.FC<reviewProps> = ({ methods }) => {
   const {
     watch,
     formState: { isSubmitting, isValid, errors },
+    setError,
   } = useFormContext<SongBookCreateModel>();
   const formData = watch();
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [successMessage, setsuccessMessage] = useState("created");
   const handleSend = () => {
+    formData.addedTime = getCurrentTimeString();
     if (!isValid) {
       console.log("🚀 ~ handleSend ~ isValid:", isValid);
       console.log("error", errors.root?.message);
@@ -33,7 +41,41 @@ const Book05Review: React.FC<reviewProps> = ({ onSubmit }) => {
       console.log("error", errors.slug?.message);
       console.log("error", errors.subTitle?.message);
     }
-    onSubmit();
+    onSubmit(formData);
+  };
+  const onSubmit: SubmitHandler<SongBookCreateModel> = async (data) => {
+    console.log("🚀 ~ onSubmit ~ data:", data);
+    try {
+      let response: any;
+
+      if (data.id) {
+        console.log("Edited response");
+        response = await BookRequest.editSongBook(data.id, data);
+      } else {
+        console.log("create Response");
+        response = await BookRequest.createSongBook(data);
+      }
+
+      console.log("🚀 ~ sendCollectionData ~ response:", response);
+
+      if (response.status === 201) {
+        setOpenSuccess(true);
+        setsuccessMessage("created");
+      }
+      if (response.status === 200) {
+        setOpenSuccess(true);
+        setsuccessMessage("edited");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const serverMessage = error.response.data;
+        setError("root", { message: serverMessage });
+      } else {
+        setError("root", {
+          message: `Collection ${data.title} not created. Try Again!`,
+        });
+      }
+    }
   };
 
   const navigate = useNavigate();
@@ -147,7 +189,7 @@ const Book05Review: React.FC<reviewProps> = ({ onSubmit }) => {
             Cancel
           </button>
           <button
-            type="submit"
+            type="button"
             className={detailsPage.editButton}
             disabled={isSubmitting}
             onClick={handleSend}
@@ -157,6 +199,13 @@ const Book05Review: React.FC<reviewProps> = ({ onSubmit }) => {
         </div>
       </div>
       <div className="mt-12"></div>
+      {openSuccess && (
+        <BookCollectionSuccess
+          collectionTitle={formData.title}
+          collectionMessage={successMessage}
+          setOpenSuccess={setOpenSuccess}
+        />
+      )}
     </div>
   );
 };

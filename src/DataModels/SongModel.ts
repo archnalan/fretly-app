@@ -21,7 +21,7 @@ export const SongWithCategorySchema = SongSchema.extend({
 export type SongWithCategory = z.infer<typeof SongWithCategorySchema>;
 
 
-export const SongCreateSchema = SongWithCategorySchema.omit({id: true});
+export const SongCreateSchema = SongWithCategorySchema.extend({id: z.number().optional(),});
 
 export type SongCreateModel = z.infer<typeof SongCreateSchema>;
 

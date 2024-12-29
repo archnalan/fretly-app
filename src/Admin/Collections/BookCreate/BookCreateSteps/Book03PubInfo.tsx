@@ -7,6 +7,7 @@ import { SongBookCreateModel } from "../../../../DataModels/SongBookModel";
 import BookProgressbar from "../BookProgressbar";
 import { createPage } from "../../../SharedClassNames/createPage";
 import { useThemeContext } from "../../../../Contexts/ThemeContext";
+import moment from "moment";
 
 const Book03PubInfo: React.FC = () => {
   const {
@@ -15,7 +16,7 @@ const Book03PubInfo: React.FC = () => {
     trigger,
     control,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useFormContext<SongBookCreateModel>();
 
   const navigate = useNavigate();
@@ -67,12 +68,11 @@ const Book03PubInfo: React.FC = () => {
                 <DatePicker
                   picker="month"
                   format="MMMM YYYY"
+                  value={field.value ? moment(field.value, "YYYY-MM-DD") : null}
                   onChange={(date) => {
-                    const yearString = date?.year().toString();
-                    const monthString = (date?.month() + 1)
-                      .toString()
-                      .padStart(2, "0");
-                    const formattedDate = `${yearString}-${monthString}-01T00:00:00`;
+                    const formattedDate = date
+                      ? date.format("YYYY-MM-DDT00:00:00")
+                      : "";
                     field.onChange(formattedDate);
                   }}
                   className={createPage.input}

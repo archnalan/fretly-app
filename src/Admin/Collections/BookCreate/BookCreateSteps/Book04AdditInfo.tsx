@@ -14,7 +14,7 @@ const Book04AdditInfo: React.FC = () => {
     watch,
     trigger,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors},
   } = useFormContext<SongBookCreateModel>();
 
   const navigate = useNavigate();

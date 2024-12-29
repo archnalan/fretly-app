@@ -122,7 +122,7 @@ const BookDetails: React.FC = () => {
             Back
           </button>
           <Link
-            to={`/admin/songbooks/edit/${id}`}
+            to={`/admin/songbooks/create/step1/${id}`}
             className={detailsPage.editButton}
           >
             Edit

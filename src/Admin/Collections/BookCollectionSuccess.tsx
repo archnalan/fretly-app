@@ -1,20 +1,18 @@
 import React from "react";
-import { useFormContext } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { SuccessPopup } from "../../SharedClassNames/successPopup";
-import { useThemeContext } from "../../../Contexts/ThemeContext";
-import { SongBookCreateModel } from "../../../DataModels/SongBookModel";
+import { useThemeContext } from "../../Contexts/ThemeContext";
+import { SuccessPopup } from "../SharedClassNames/successPopup";
 
 type popUPMessage = {
-  successType:string;
-  setIsSongCreated: React.Dispatch<React.SetStateAction<boolean>>;
+  collectionTitle: string;
+  collectionMessage: string;
+  setOpenSuccess: React.Dispatch<React.SetStateAction<boolean>>;
 };
-const SongCreated: React.FC<popUPMessage> = ({
-  setIsSongCreated,
-  successType,
+const BookCollectionSuccess: React.FC<popUPMessage> = ({
+  collectionTitle,
+  collectionMessage,
+  setOpenSuccess,
 }) => {
-  const { watch, reset } = useFormContext<SongBookCreateModel>();
-  const songData = watch();
   const navigate = useNavigate();
   const { theme } = useThemeContext();
 
@@ -26,27 +24,27 @@ const SongCreated: React.FC<popUPMessage> = ({
           <button
             className={SuccessPopup.closeButton}
             onClick={() => {
-              setIsSongCreated(false);
-              navigate("/admin/songs");
+              setOpenSuccess(false);
+              navigate("/admin/songbooks");
             }}
           >
             <span className={SuccessPopup.closeIcon}>&times;</span>
           </button>
         </div>
         <p className={SuccessPopup.message}>
-          Song <strong>{songData.title}</strong> has been {successType}{" "}
+          Music Collection <strong>{collectionTitle}</strong> has been{" "}
+          {collectionMessage}{" "}
           successfully!
         </p>
         <div className={SuccessPopup.buttonContainer}>
           <button
             className={SuccessPopup.okButton}
             onClick={() => {
-              reset();
-              navigate("/admin/songs");
-              () => setIsSongCreated(false);
+              navigate("/admin/songbooks");
+              () => setOpenSuccess(false);
             }}
           >
-            Done
+            Ok
           </button>
         </div>
       </div>
@@ -54,4 +52,4 @@ const SongCreated: React.FC<popUPMessage> = ({
   );
 };
 
-export default SongCreated;
+export default BookCollectionSuccess;

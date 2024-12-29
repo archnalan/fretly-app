@@ -1,19 +1,65 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext, useFormState } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import BookHeader from "../SharedSections/BookHeader";
-import { SongBookCreateModel } from "../../../../DataModels/SongBookModel";
+import {
+  BookCreateSchema,
+  SongBookCreateModel,
+  SongBookModel,
+  SongBookSchema,
+} from "../../../../DataModels/SongBookModel";
 import BookProgressbar from "../BookProgressbar";
 import { createPage } from "../../../SharedClassNames/createPage";
 import { useThemeContext } from "../../../../Contexts/ThemeContext";
+import { idSchema } from "../../../../DataModels/ValidatedID";
+import BookRequest from "../../../../API/BookRequest";
+import moment from "moment";
 
 const Book01BasicInfo: React.FC = () => {
   const {
     register,
     watch,
     trigger,
+    setValue,
     formState: { errors },
   } = useFormContext<SongBookCreateModel>();
+
+  const [bookEditData, setBookEditData] = useState<
+    SongBookCreateModel | undefined
+  >(undefined);
+  const { id } = useParams();
+  useEffect(() => {
+    console.log("Id", id);
+    if (id) {
+      const getBook = async () => {
+        try {
+          const validatedId = idSchema.parse(id);
+          const response = await BookRequest.fetchSpecificSongBook(validatedId);
+
+          const bookResult = BookCreateSchema.safeParse(response.data);
+          if (!bookResult.success) {
+            console.error("🚀 ~ getSong ~ songResult.error:", bookResult.error);
+            return;
+          }
+          setBookEditData(bookResult.data);
+          /* populate the fields */
+          Object.entries(bookResult.data).forEach(([key, value]) => {
+            if (key === "publicationDate") {
+              setValue(
+                key as keyof SongBookCreateModel,
+                moment(value).format("YYYY-MM-DD")
+              );
+            } else {
+              setValue(key as keyof SongBookCreateModel, value);
+            }
+          });
+        } catch (error) {
+          console.error("Error fetching song", error);
+        }
+      };
+      getBook();
+    }
+  }, [id]);
 
   const valid = !errors.title && !errors.subTitle && !errors.language;
 

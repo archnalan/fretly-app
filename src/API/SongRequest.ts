@@ -15,7 +15,7 @@ const fetchAllSongs = () => API.get(apiEndpoints.fetchAllSongs);
 const fetchSpecificSong = (id: number) => API.get(apiEndpoints.fetchSpecificSong(id));
 const createSong = (SongData: SongCreateModel) => API.post(apiEndpoints.createSong, SongData);
 const deleteSong = (id: number) => API.delete(apiEndpoints.deleteSong(id));
-const editSong = (id: number, SongData: SongModel) => API.put(apiEndpoints.editSong(id), SongData);
+const editSong = (id: number, SongData: SongCreateModel) => API.put(apiEndpoints.editSong(id), SongData);
 
 const SongRequest = {
   fetchSongs,

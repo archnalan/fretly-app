@@ -251,7 +251,7 @@ const Song: React.FC = () => {
                             </li>
                             <li className={listPage.liElement}>
                               <Link
-                                to={`edit/${song.id}`}
+                                to={`create/step1/${song.id}`}
                                 className={listPage.editButton}
                               >
                                 <FiEdit className={listPage.iconStyle} /> Edit
@@ -261,7 +261,7 @@ const Song: React.FC = () => {
                               <button
                                 className={listPage.deleteButton}
                                 onClick={() => {
-                                  setToDelete([...toDelete, song]);
+                                  setToDelete([song]);
                                   setOpenConfirm(true);
                                 }}
                               >

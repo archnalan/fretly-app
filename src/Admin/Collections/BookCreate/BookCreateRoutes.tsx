@@ -1,5 +1,4 @@
-import React from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { Route, Routes } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,28 +17,21 @@ const BookCreateRoutes: React.FC = () => {
     mode: "onChange",
     resolver: zodResolver(BookCreateSchema),
   });
-  const onSubmit: SubmitHandler<SongBookCreateModel> = (data) => {
-    console.log("🚀 ~ onSubmit ~ data:", data);
-  };
 
   return (
     <>
       <FormProvider {...methods}>
         <form
-          onSubmit={methods.handleSubmit(onSubmit)}
+          onSubmit={methods.handleSubmit(() => {})}
           className={createPage.multiformContainer}
         >
           <Routes>
             <Route path="step1" element={<Book01BasicInfo />} />
+            <Route path="step1/:id" element={<Book01BasicInfo />} />
             <Route path="step2" element={<Book02DetailsInfo />} />
             <Route path="step3" element={<Book03PubInfo />} />
             <Route path="step4" element={<Book04AdditInfo />} />
-            <Route
-              path="step5"
-              element={
-                <Book05Review onSubmit={methods.handleSubmit(onSubmit)} />
-              }
-            />
+            <Route path="step5" element={<Book05Review methods={methods} />} />
           </Routes>
         </form>
       </FormProvider>

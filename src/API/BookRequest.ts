@@ -1,4 +1,4 @@
-import { SongBookModel } from "../DataModels/SongBookModel";
+import { SongBookCreateModel, SongBookModel } from "../DataModels/SongBookModel";
 import API from "./API";
 
 const bookApiEndpoints = {
@@ -18,11 +18,11 @@ const fetchSpecificSongBook = (id: number) =>
   API.get(bookApiEndpoints.fetchSpecificSongBook(id));
 const fetchSpecificSongBookWithCategories = (id: number) =>
   API.get(bookApiEndpoints.fetchSpecificSongBookWithCategories(id));
-const createSongBook = (SongBookData: SongBookModel) =>
+const createSongBook = (SongBookData: SongBookCreateModel) =>
   API.post(bookApiEndpoints.createSongBook, SongBookData);
 const deleteSongBook = (id: number) =>
   API.delete(bookApiEndpoints.deleteSongBook(id));
-const editSongBook = (id: number, SongBookData: SongBookModel) =>
+const editSongBook = (id: number, SongBookData: SongBookCreateModel) =>
   API.put(bookApiEndpoints.editSongBook(id), SongBookData);
 
 const BookRequest = {

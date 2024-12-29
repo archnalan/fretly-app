@@ -78,23 +78,18 @@ const SongBook: React.FC = () => {
   }, []);
 
   const handleDelete = (book: string, id: number) => {
-    const confirm = window.confirm(
-      `Would you like to delete Song book ${book}`
-    );
-    if (confirm) {
-      deleteSongBook(id);
-    }
-  };
-  const deleteSongBook = async (id: number) => {
-    try {
-      const validatedId = idSchema.parse(id);
-      const response = await BookRequest.deleteSongBook(validatedId);
-      console.log("🚀 ~ deleteSongBook ~ response:", response);
+    const deleteSongBook = async (id: number) => {
+      try {
+        const validatedId = idSchema.parse(id.toString());
+        const response = await BookRequest.deleteSongBook(validatedId);
+        console.log("🚀 ~ deleteSongBook ~ response:", response);
 
-      window.location.reload();
-    } catch (error) {
-      console.log("🚀 ~ deleteSongBook ~ error:", error);
-    }
+        window.location.reload();
+      } catch (error) {
+        console.log("🚀 ~ deleteSongBook ~ error:", error);
+      }
+    };
+    deleteSongBook(id);
   };
 
   const handleSelectPage = (book: SongBookModel, isChecked: boolean) => {
@@ -245,7 +240,7 @@ const SongBook: React.FC = () => {
                             </li>
                             <li className="w-full">
                               <Link
-                                to={`edit/${book.id}`}
+                                to={`/admin/songbooks/create/step1/${book.id}`}
                                 className={listPage.editButton}
                               >
                                 <FiEdit className="mr-2" /> Edit

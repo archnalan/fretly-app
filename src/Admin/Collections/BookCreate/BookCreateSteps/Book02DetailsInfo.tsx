@@ -12,7 +12,7 @@ const Book02DetailsInfo: React.FC = () => {
     register,
     trigger,
     watch,
-    formState: { errors, isValid },
+    formState: { errors},
   } = useFormContext<SongBookCreateModel>();
 
   const navigate = useNavigate();
