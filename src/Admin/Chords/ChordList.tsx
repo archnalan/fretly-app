@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { RiStickyNoteAddFill } from "react-icons/ri";
 import Pagination from "../../Helper/Pagination";
 import { IoSearchOutline } from "react-icons/io5";
 import ChordCreate from "./ChordCreate";
 import ChordCard from "./ChordCard";
-import ChordEdit from "./ChordEdit";
 import ChordDelete from "./ChordDelete";
 import {
   ChordEditModel,
@@ -16,14 +15,13 @@ import { ChartModel, ChartSchema } from "../../DataModels/ChartModel";
 import ChordRequest from "../../API/ChordRequest";
 import ChartRequest from "../../API/ChartRequest";
 import { listPage } from "../SharedClassNames/ListPage";
-import { useThemeContext } from "../../Contexts/ThemeContext";
+import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 
 const Chord: React.FC = () => {
   const [chords, setChords] = useState<ChordModel[]>([]);
   const [charts, setCharts] = useState<ChartModel[]>([]);
   const [filteredChords, setfilteredChords] = useState<ChordModel[]>([]);
   const [openChordCreate, setOpenChordCreate] = useState(false);
-  const [openChordEdit, setOpenChordEdit] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [editedChord, setEditedChord] = useState<ChordModel>();
@@ -33,10 +31,12 @@ const Chord: React.FC = () => {
   const [toDelete, setToDelete] = useState<ChordModel>();
   const [errorDelete, setErrorDelete] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [newList, setNewList] = useState("");
+  const [headerText, setHeaderText] = useState("Create");
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [chordsPerPage] = useState(4);
   const location = useLocation();
-  const { theme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
 
   useEffect(() => {
     if (location.state?.successMessage) {
@@ -84,14 +84,16 @@ const Chord: React.FC = () => {
             chordDisplay.unshift(editedChord); //edited chord at 1st pstn
           }
         }
-        setChords(chordDisplay);
-        setfilteredChords(chordDisplay);
+        if(chordDisplay || newList){
+          setChords(chordDisplay);
+          setfilteredChords(chordDisplay);
+        }
       } catch (error) {
         console.error(error);
       }
     };
     FetchChords();
-  }, [editedName, createdName]);
+  }, [editedName, createdName, newList]);
 
   useEffect(() => {
     const FetchCharts = async () => {
@@ -140,11 +142,8 @@ const Chord: React.FC = () => {
   };
 
   const fetchChord = async (id: number) => {
-    console.log("🚀 ~ fetchChord ~ id:", id);
     try {
       const response = await ChordRequest.fetchChordById(id);
-      console.log("🚀 ~ fetchChord ~ response:", response);
-
       if (response.data) {
         setChord(response.data);
       }
@@ -153,12 +152,31 @@ const Chord: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    // Fetch theme from local storage
+    const storedTheme = localStorage.getItem("theme");
+
+    if (storedTheme) {
+      // Apply the stored theme
+      document.documentElement.setAttribute("data-theme", storedTheme);
+      setTheme(storedTheme as Theme);
+    } else {
+      // Set initial theme based on system preference or default
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const initialTheme = prefersDarkMode ? "dark" : "autumn";
+      document.documentElement.setAttribute("data-theme", initialTheme);
+      setTheme(initialTheme);
+    }
+  }, [theme]);
+
   const handleDelete = (chord: ChordModel) => {
     const DeleteData = async () => {
       try {
         const response = ChordRequest.deleteChord(chord.id);
         console.log("🚀 ~ DeleteData ~ response:", response);
-
+        setNewList(Chord.name);
         window.location.reload();
       } catch (error) {
         console.error("Error deleting chord", error);
@@ -172,7 +190,10 @@ const Chord: React.FC = () => {
   const handlePageChange = (selectedPage: number) => {
     setCurrentPageIndex(selectedPage);
   };
-
+  const handleChordEdit = (headerText: string) => {
+    setHeaderText(headerText);
+    setOpenChordCreate(true);
+  };
   const pageCount = Math.ceil(filteredChords.length / chordsPerPage);
   const offset = currentPageIndex * chordsPerPage;
   const currentChords = filteredChords.slice(offset, offset + chordsPerPage);
@@ -208,7 +229,11 @@ const Chord: React.FC = () => {
               </div>
               <div
                 className={`${listPage.createLinkContainer} cursor-pointer`}
-                onClick={() => setOpenChordCreate(true)}
+                onClick={() => {
+                  setChord(undefined);
+                  setHeaderText("Create");
+                  setOpenChordCreate(true);
+                }}
               >
                 <label
                   htmlFor="#createlink"
@@ -226,7 +251,7 @@ const Chord: React.FC = () => {
               charts={charts}
               fetchChord={fetchChord}
               currentChords={currentChords}
-              setOpenChordEdit={setOpenChordEdit}
+              setOpenChordEdit={handleChordEdit}
               setOpenConfirm={setOpenConfirm}
               setToDelete={setToDelete}
             />
@@ -242,15 +267,10 @@ const Chord: React.FC = () => {
 
           {openChordCreate && (
             <ChordCreate
+              chord={chord}
+              headerText={headerText}
               setCreatedName={setCreatedName}
               setOpenChordCreate={setOpenChordCreate}
-            />
-          )}
-          {openChordEdit && chord && (
-            <ChordEdit
-              chordToEdit={chord}
-              setEditedName={setEditedName}
-              setOpenChordEdit={setOpenChordEdit}
             />
           )}
           {openConfirm && toDelete && (

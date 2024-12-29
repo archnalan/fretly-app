@@ -8,7 +8,7 @@ import BookRequest from "../../API/BookRequest";
 import { idSchema } from "../../DataModels/ValidatedID";
 import Pagination from "../../Helper/Pagination";
 import { listPage } from "../SharedClassNames/ListPage";
-import { useThemeContext } from "../../Contexts/ThemeContext";
+import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 import BookDelete from "./BookDelete";
 
 const SongBook: React.FC = () => {
@@ -23,7 +23,7 @@ const SongBook: React.FC = () => {
   const skeletonArray = Array.from({ length: songsPerPage });
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
 
   const tableHead = [
     { th: "Title", className: "col-title" },
@@ -76,6 +76,25 @@ const SongBook: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    // Fetch theme from local storage
+    const storedTheme = localStorage.getItem("theme");
+
+    if (storedTheme) {
+      // Apply the stored theme
+      document.documentElement.setAttribute("data-theme", storedTheme);
+      setTheme(storedTheme as Theme);
+    } else {
+      // Set initial theme based on system preference or default
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const initialTheme = prefersDarkMode ? "dark" : "autumn";
+      document.documentElement.setAttribute("data-theme", initialTheme);
+      setTheme(initialTheme);
+    }
+  }, [theme]);
 
   const handleDelete = (book: string, id: number) => {
     const deleteSongBook = async (id: number) => {

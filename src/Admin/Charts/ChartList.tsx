@@ -8,7 +8,7 @@ import { ChartModel, ChartSchema } from "../../DataModels/ChartModel";
 import ChartRequest from "../../API/ChartRequest";
 import Pagination from "../../Helper/Pagination";
 import ChartDelete from "./ChartDelete";
-import { useThemeContext } from "../../Contexts/ThemeContext";
+import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 import { listPage } from "../SharedClassNames/ListPage";
 
 const ChartList: React.FC = () => {
@@ -21,7 +21,7 @@ const ChartList: React.FC = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [chartsPerPage] = useState(4);
   const location = useLocation();
-  const { theme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -82,7 +82,24 @@ const ChartList: React.FC = () => {
       setfilteredCharts(charts);
     }
   };
+  useEffect(() => {
+    // Fetch theme from local storage
+    const storedTheme = localStorage.getItem("theme");
 
+    if (storedTheme) {
+      // Apply the stored theme
+      document.documentElement.setAttribute("data-theme", storedTheme);
+      setTheme(storedTheme as Theme);
+    } else {
+      // Set initial theme based on system preference or default
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const initialTheme = prefersDarkMode ? "dark" : "autumn";
+      document.documentElement.setAttribute("data-theme", initialTheme);
+      setTheme(initialTheme);
+    }
+  }, [theme]);
   const handleDelete = (name: string, id: number) => {
     const deleteData = async () => {
       try {

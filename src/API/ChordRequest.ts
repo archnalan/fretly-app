@@ -1,4 +1,4 @@
-import {ChordCreateModel, ChordModel} from "../DataModels/ChordModel"
+import {ChordCreateModel, ChordEditModel, ChordModel} from "../DataModels/ChordModel"
 import API from "./API";
 
 const apiEndpoints = {
@@ -27,7 +27,7 @@ const createWithChart = (chordData: ChordModel) => API.post(apiEndpoints.createW
 const createWithCharts = (chordData: ChordModel) => API.post(apiEndpoints.createWithCharts, chordData);
 const createManyChords = (chordsData: ChordModel[]) => API.post(apiEndpoints.createManyChords, chordsData);
 const createManyChordsWithCharts = (chordsData: ChordModel[]) => API.post(apiEndpoints.createManyChordsWithCharts, chordsData);
-const editChord = (id: number, chordData: ChordModel) => API.put(apiEndpoints.editChord(id), chordData);
+const editChord = (id: number, chordData: ChordCreateModel) => API.put(apiEndpoints.editChord(id), chordData);
 const editManyChords = (chordsData: ChordModel[]) => API.put(apiEndpoints.editManyChords, chordsData);
 const editManyChordsWithCharts = (chordsData: ChordModel[]) => API.put(apiEndpoints.editManyChordsWithCharts, chordsData);
 const deleteChord = (id: number) => API.delete(apiEndpoints.deleteChord(id));

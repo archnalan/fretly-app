@@ -9,7 +9,7 @@ import VerseContent from "./VerseContent";
 import SongTitle from "./SongTitle";
 import VerseTabs from "./VerseTab.tsx";
 import { TbEdit } from "react-icons/tb";
-import { useThemeContext } from "../../Contexts/ThemeContext.ts";
+import { Theme, useThemeContext } from "../../Contexts/ThemeContext.ts";
 import { useNavigate } from "react-router-dom";
 import { getFromLocalStorage } from "../AdminHelper/TempLocalStorage.ts";
 import { PayLoadSchema } from "../../DataModels/PayLoad.ts";
@@ -28,7 +28,7 @@ const Chordify: React.FC = () => {
   const [chords, setChords] = useState<ChordModel[]>([]);
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState(1);
-  const { theme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
 
   const navigate = useNavigate();
 
@@ -70,6 +70,25 @@ const Chordify: React.FC = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    // Fetch theme from local storage
+    const storedTheme = localStorage.getItem("theme");
+
+    if (storedTheme) {
+      // Apply the stored theme
+      document.documentElement.setAttribute("data-theme", storedTheme);
+      setTheme(storedTheme as Theme);
+    } else {
+      // Set initial theme based on system preference or default
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const initialTheme = prefersDarkMode ? "dark" : "autumn";
+      document.documentElement.setAttribute("data-theme", initialTheme);
+      setTheme(initialTheme);
+    }
+  }, [theme]);
 
   return (
     <>

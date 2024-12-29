@@ -1,4 +1,7 @@
 import React from "react";
+import { ChordModel } from "../../DataModels/ChordModel";
+import { confirmDelete } from "../SharedClassNames/ConfirmDelete";
+import { useThemeContext } from "../../Contexts/ThemeContext";
 
 type popUPMessage = {
   toDelete: ChordModel;
@@ -10,30 +13,31 @@ const ChordDelete: React.FC<popUPMessage> = ({
   handleDelete,
   setOpenConfirm,
 }) => {
+  const { theme } = useThemeContext();
   return (
-    <div className="w-100 vh-100 d-flex justify-content-center align-items-center position-fixed bg-dark bg-opacity-50 z-100 chord-delete">
-      <div className="w-50 d-flex flex-column position-relative border bg-white shadow px-5 pt-3 pd-5 rounded">
-        <div className="w-100 d-flex position-absolute top-0 end-0 justify-content-between align-items-end ">
+    <div className={confirmDelete.overlay}>
+      <div className={confirmDelete.container(theme)}>
+        <div className={confirmDelete.header}>
           <div></div>
           <button
-            className="btn btn-transparent fs-1 text-danger border-0  me-2"
+            className={confirmDelete.closeButton}
             onClick={() => setOpenConfirm(false)}
           >
-            &times;
+            <span className="text-2xl font-semibold">&times;</span>
           </button>
         </div>
-        <p className="fs-3 mt-5 mb-5">
+        <p className={confirmDelete.message}>
           Do you want to delete the chord <strong>{toDelete.chordName}</strong>?
         </p>
-        <div className="d-flex justify-content-between mb-5">
+        <div className={confirmDelete.buttonContainer}>
           <button
-            className="btn btn-sm btn-danger fs-5 p-2 ps-4 pe-4 "
+            className={confirmDelete.noButton}
             onClick={() => setOpenConfirm(false)}
           >
             No
           </button>
           <button
-            className="btn btn-sm btn-primary fs-5 p-2 ps-4 pe-4 "
+            className={confirmDelete.yesButton}
             onClick={() => {
               handleDelete(toDelete);
               setOpenConfirm(false);

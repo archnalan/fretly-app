@@ -12,7 +12,7 @@ import { MessageSchema } from "../../DataModels/SuccessMessage";
 import { listPage } from "../SharedClassNames/ListPage";
 import Pagination from "../../Helper/Pagination";
 import SongDelete from "./SongDelete";
-import { useThemeContext } from "../../Contexts/ThemeContext";
+import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 import ErrorMessage from "../AdminHelper/ErrorMessage";
 
 const Song: React.FC = () => {
@@ -28,7 +28,7 @@ const Song: React.FC = () => {
   const skeletonArray = Array.from({ length: songsPerPage });
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
 
   const [filteredSongs, setfilteredSongs] = useState<SongWithCategory[]>([]);
 
@@ -83,6 +83,25 @@ const Song: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    // Fetch theme from local storage
+    const storedTheme = localStorage.getItem("theme");
+
+    if (storedTheme) {
+      // Apply the stored theme
+      document.documentElement.setAttribute("data-theme", storedTheme);
+      setTheme(storedTheme as Theme);
+    } else {
+      // Set initial theme based on system preference or default
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const initialTheme = prefersDarkMode ? "dark" : "autumn";
+      document.documentElement.setAttribute("data-theme", initialTheme);
+      setTheme(initialTheme);
+    }
+  }, [theme]);
+  
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
 

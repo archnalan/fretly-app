@@ -12,7 +12,7 @@ type ChordCardType = {
   fetchChord: (id: number) => Promise<void>;
   setToDelete: (chart: ChordModel) => void;
   setOpenConfirm: React.Dispatch<React.SetStateAction<boolean>>;
-  setOpenChordEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenChordEdit: (header: string) => void;
 };
 const ChordCard: React.FC<ChordCardType> = ({
   charts,
@@ -85,7 +85,7 @@ const ChordCard: React.FC<ChordCardType> = ({
                   <button
                     className="btn btn-sm btn-primary me-2"
                     onClick={() => {
-                      setOpenChordEdit(true);
+                      setOpenChordEdit("Edit");
                       fetchChord(chord.id);
                     }}
                   >

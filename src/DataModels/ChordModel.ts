@@ -31,7 +31,8 @@ export const ChordCreateSchema = ChordEditSchema.extend({
   chordName: z.string()
   .min(1, { message: "Chord name is required" })
   .regex(chordNameRegex, {message:"Invalid Chord!"}),
-}).omit({ id: true });
+  id: z.number().int({ message: "ID must be an integer" }).optional(),
+});
 
 export type ChordCreateModel = z.infer<typeof ChordCreateSchema>;
 
