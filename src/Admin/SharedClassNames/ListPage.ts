@@ -5,7 +5,7 @@ container: "w-full h-full overflow-y-scroll relative bg-base-200",
   innerContainer: (theme: theme) =>
     `${theme === "dark" ? "text-neutral-300" : "text-dark"} flex flex-col justify-start items-center bg-base-200 h-full`,
   header: "m-3 text-3xl mt-8 text-primary font-semibold", 
-  successAlert: "w-3/4 alert alert-error text-wrap",
+  successAlert: "w-3/4 alert alert-success text-wrap mb-2",
   toastContainer:"toast toast-top toast-end",
   toastDiv:"alert alert-success",
   errorAlert: "w-3/4 alert alert-error text-wrap text-slate-200 bg-opacity-1/2",

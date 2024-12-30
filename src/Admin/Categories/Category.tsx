@@ -77,12 +77,12 @@ const Category: React.FC = () => {
 
     const timer = setTimeout(() => {
       setSuccessMessage("");
-      //clear the success state object
+      location.state = { successMessage: "" };
       navigate(location.pathname, { replace: true });
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [location.state]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -235,7 +235,7 @@ const Category: React.FC = () => {
                     <tr key={rowIndex}>
                       {tableSkeletons.map((_, colIndex) => (
                         <td key={colIndex} className="items-center">
-                          <div className="skeleton w-full h-[2rem]  px-[0.5rem] border-none my-[0.5rem] "></div>
+                          <div className={listPage.tableSkelton}></div>
                         </td>
                       ))}
                     </tr>
@@ -306,11 +306,11 @@ const Category: React.FC = () => {
                   ))}
             </tbody>
           </table>
-          {currentCategories.length == 0 && (
+          {/*  {currentCategories.length == 0 && (
             <pre className={listPage.spinnerPreview}>
               <span className={listPage.spinnerSpan}></span>
             </pre>
-          )}
+          )} */}
         </div>
 
         <div className={listPage.paginationContainer}>

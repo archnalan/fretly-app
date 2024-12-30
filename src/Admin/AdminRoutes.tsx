@@ -23,6 +23,7 @@ import ChartList from "./Charts/ChartList";
 import ChartDetails from "./Charts/ChartDetails";
 import ChordCreate from "./Chords/ChordCreate";
 import ChordDetails from "./Chords/ChordDetails";
+import ChartCreate from "./Charts/ChartCreate";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -63,9 +64,11 @@ const AdminRoutes: React.FC = () => {
           {/* charts */}
           <Route path="chordcharts" element={<ChartList />}></Route>
           <Route path="chordcharts/:id" element={<ChartDetails />}></Route>
-          {/*<Route path="chordcharts/create/*" element={<ChartCreateRoutes />}></Route>
+          <Route path="chordcharts/create" element={<ChartCreate />}></Route>
+          <Route path="chordcharts/edit/:id" element={<ChartCreate />}></Route>
+          {/*
           <Route path="chordcharts/edit/:id" element={<PageEdit />}></Route> */}
-          {/*<Route path="chordcharts/edit/:id" element={<PageEdit />}></Route> */}
+          {/* */}
         </Route>
       </Routes>
     </BrowserRouter>

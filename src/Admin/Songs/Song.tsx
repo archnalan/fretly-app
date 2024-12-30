@@ -77,6 +77,7 @@ const Song: React.FC = () => {
     const timer = setTimeout(() => {
       setSuccessMessage("");
       //clear the success state object
+      location.state = { successMessage: "" };
       navigate(location.pathname, { replace: true });
     }, 5000);
 
@@ -101,7 +102,7 @@ const Song: React.FC = () => {
       setTheme(initialTheme);
     }
   }, [theme]);
-  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
 
@@ -295,11 +296,6 @@ const Song: React.FC = () => {
                   ))}
             </tbody>
           </table>
-          {currentSongs.length == 0 && (
-            <pre className={listPage.spinnerPreview}>
-              <span className={listPage.spinnerSpan}></span>
-            </pre>
-          )}
         </div>
         <div className={listPage.paginationContainer}>
           <Pagination pageCount={pageCount} onPageChange={handlePageChange} />

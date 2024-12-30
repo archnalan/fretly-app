@@ -31,9 +31,10 @@ const ChordCarousel: React.FC<chordCarousel> = ({ chord, charts }) => {
               style={{
                 backgroundColor: `${theme === "dark" ? "#ddd" : ""}`,
                 borderRadius: "0.5em",
+                objectFit: "contain",
               }}
             />
-            <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
+            <div className="absolute left-[10%] right-[10%] top-1/2 flex -translate-y-1/2 transform justify-between">
               <a
                 href={`#${filteredCharts[prevIndex].id}`}
                 className="btn btn-circle"

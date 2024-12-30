@@ -70,6 +70,7 @@ const SongBook: React.FC = () => {
 
     const timer = setTimeout(() => {
       setSuccessMessage("");
+      location.state = { successMessage: "" };
       //clear the success state object
       navigate(location.pathname, { replace: true });
     }, 5000);
@@ -213,7 +214,7 @@ const SongBook: React.FC = () => {
                     <tr key={rowIndex}>
                       {tableSkeletons.map((_, colIndex) => (
                         <td key={colIndex} className="items-center">
-                          <div className="skeleton w-full h-[1.5rem]  px-[0.25rem] border-none my-[0.5rem] "></div>
+                          <div className={listPage.tableSkelton}></div>
                         </td>
                       ))}
                     </tr>
@@ -283,11 +284,11 @@ const SongBook: React.FC = () => {
                   ))}
             </tbody>
           </table>
-          {currentBooks.length == 0 && (
+          {/* {currentBooks.length == 0 && (
             <pre className="w-full h-full flex justify-center items-center">
               <span className="loading loading-spinner text-info loading-lg"></span>
             </pre>
-          )}
+          )} */}
         </div>
 
         <div className={listPage.paginationContainer}>

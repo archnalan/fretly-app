@@ -1,19 +1,19 @@
 
 export const createPage= {
-  container: "w-full h-full flex flex-col overflow-y-scroll bg-base-200 relative  justify-start items-center z-1 mb-5",
+  container: "w-full h-full flex flex-col overflow-y-scroll bg-base-200 relative  justify-start items-center z-1",
   containerSmall: "w-full h-full flex flex-col overflow-y-scroll bg-base-200 relative  justify-center items-center z-1 mb-5",
   multiformContainer: "w-full h-full relative",
   progressbar: "w-1/2 flex justify-center  mt-[3rem] px-[2rem]",
   innerContainer: (theme: string) =>
-    `${theme === "dark" ? "text-neutral-300" : "text-dark"} w-1/2 border bg-base-100 px-5 pt-3 pb-5 rounded-xl mt-[3rem] shadow-xl`,
+    `${theme === "dark" ? "text-neutral-300" : "text-dark"} w-3/4 mb-5 lg:w-1/2 border bg-base-100 px-5 pt-3 pb-4 rounded-xl mt-[2rem] shadow-xl`,
   revertContainer: "flex items-center text-primary",
   revertButton:"text-xl me-2",
   header: "text-2xl text-center font-bold mt-4 mb-5",
-  form: "mb-4 flex justify-between", 
+  form: "mb-4 flex flex-col lg:flex-row justify-between", 
   topDownform: "mb-4 flex flex-col flex-md-row justify-between",
   label: "text-lg",
   labelRequired: "text-lg required",
-  inputContainer: "w-3/4",
+  inputContainer: "w-full lg:w-3/4",
   input: `input input-bordered w-full mb-1`,
   errorText: "text-error text-sm mb-2",
   textareaFloat:"block textarea textarea-bordered px-2 pb-2 pt-5 w-full text-lg rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:borderprimary peer",

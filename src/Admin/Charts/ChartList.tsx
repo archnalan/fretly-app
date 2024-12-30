@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiEdit, FiList, FiTrash2 } from "react-icons/fi";
-import { SiAudiomack } from "react-icons/si";
 import { RiStickyNoteAddFill } from "react-icons/ri";
 import { IoSearchOutline } from "react-icons/io5";
 import { ChartModel, ChartSchema } from "../../DataModels/ChartModel";
@@ -10,6 +9,8 @@ import Pagination from "../../Helper/Pagination";
 import ChartDelete from "./ChartDelete";
 import { Theme, useThemeContext } from "../../Contexts/ThemeContext";
 import { listPage } from "../SharedClassNames/ListPage";
+import { ChordModel } from "../../DataModels/ChordModel";
+import ChordRequest from "../../API/ChordRequest";
 
 const ChartList: React.FC = () => {
   const [charts, setCharts] = useState<ChartModel[]>([]);
@@ -30,6 +31,7 @@ const ChartList: React.FC = () => {
     }
     const timer = setTimeout(() => {
       setSuccessMessage("");
+      location.state = { successMessage: "" };
     }, 5000);
     return () => clearTimeout(timer);
   }, [location.state]);
@@ -125,6 +127,17 @@ const ChartList: React.FC = () => {
     setCurrentPageIndex(selectedPage);
   };
 
+  const getChord = async (id: number) => {
+    if (id > 0) {
+      try {
+        const chord = await ChartRequest.fetchSpecificChartWithParentChord(id);
+        return chord;
+      } catch (error) {
+        console.error("Error on fetching chart with parent Chord:", error);
+      }
+    }
+  };
+
   const pageCount = Math.ceil(filteredCharts.length / chartsPerPage);
   const offset = currentPageIndex * chartsPerPage;
   const currentCharts = filteredCharts.slice(offset, offset + chartsPerPage);
@@ -156,10 +169,7 @@ const ChartList: React.FC = () => {
                   <IoSearchOutline size={20} />
                 </button>
               </div>
-              <Link
-                to="/admin/chordcharts/create"
-                className={listPage.createLinkContainer}
-              >
+              <Link to="create" className={listPage.createLinkContainer}>
                 <label
                   htmlFor="#createlink"
                   className={listPage.createLinkLabel}
@@ -172,63 +182,78 @@ const ChartList: React.FC = () => {
               </Link>
             </div>
           </div>
-
-          <div className="w-3/4 grid grid-cols-1 md:grid-cols-4 gap-4 mt-[2rem] ">
-            {currentCharts.map((chart, index) => (
-              <div className="card" key={index}>
-                <figure>
-                  <img
-                    src={chart.filePath}
-                    alt={chart.filePath}
-                    className="w-full img-thumbnail bg-base-100"
-                    style={{
-                      backgroundColor: `${theme === "dark" ? "#ddd" : ""}`,
-                      maxHeight: "15em",
-                      maxWidth: "10em",
-                      borderRadius: "0.5em",
-                    }}
-                  />
-                </figure>
-                <div className="card-actions justify-center mt-[1rem]">
-                  <Link
-                    to={`${chart.id}`}
-                    className="btn btn-sm btn-success me-2"
-                  >
-                    <FiList />
-                  </Link>
-                  <Link
-                    to={`edit/${chart.id}`}
-                    className="btn btn-sm btn-primary me-2"
-                  >
-                    <FiEdit />
-                  </Link>
-                  <button
-                    className="btn btn-sm btn-error"
-                    onClick={() => {
-                      setToDelete(chart);
-                      setOpenConfirm(true);
-                    }}
-                  >
-                    <FiTrash2 />
-                  </button>
-                </div>
-                <div className="card-body">
-                  <h5 className="card-title">Fret: {chart.fretPosition}</h5>
-                  <p className="card-text">
-                    {chart.positionDescription &&
-                    chart.positionDescription.length > 25
-                      ? `${chart.positionDescription.slice(0, 45)}...`
-                      : chart.positionDescription}
-                  </p>
-                </div>
+          <div className="w-3/4 mt-[1.5rem]">
+            {currentCharts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 flex-grow gap-4">
+                {currentCharts.map((chart, index) => (
+                  <div className="card" key={index}>
+                    <figure>
+                      <img
+                        src={chart.filePath}
+                        alt={chart.filePath}
+                        className="w-full img-thumbnail bg-base-100"
+                        style={{
+                          backgroundColor: `${theme === "dark" ? "#ddd" : ""}`,
+                          maxHeight: "15em",
+                          maxWidth: "10em",
+                          borderRadius: "0.5em",
+                        }}
+                      />
+                    </figure>
+                    <div className="card-actions justify-center mt-[1rem]">
+                      <Link
+                        to={`${chart.id}`}
+                        className="btn btn-sm btn-success me-2"
+                      >
+                        <FiList />
+                      </Link>
+                      <Link
+                        to={`edit/${chart.id}`}
+                        className="btn btn-sm btn-primary me-2"
+                      >
+                        <FiEdit />
+                      </Link>
+                      <button
+                        className="btn btn-sm btn-error"
+                        onClick={() => {
+                          setToDelete(chart);
+                          setOpenConfirm(true);
+                        }}
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                    <div className="card-body">
+                      {/* <h5>{getChord(chart.chordId ?? 0).ChordName}</h5> */}
+                      <h5 className="card-title">Fret: {chart.fretPosition}</h5>
+                      <p className="card-text">
+                        {chart.positionDescription &&
+                        chart.positionDescription.length > 25
+                          ? `${chart.positionDescription.slice(0, 45)}...`
+                          : chart.positionDescription}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 flex-grow gap-4 ">
+                {Array.from({ length: chartsPerPage }).map((_, index) => (
+                  <div key={index} className="flex w-52 flex-col gap-4">
+                    <div className="skeleton h-[15rem] w-full"></div>
+                    <div className="skeleton h-4 w-28"></div>
+                    <div className="skeleton h-5 w-full"></div>
+                    <div className="skeleton h-5 w-full"></div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {currentCharts.length == 0 && (
+          {/*  {currentCharts.length == 0 && (
             <pre className={listPage.spinnerPreview}>
               <span className={listPage.spinnerSpan}></span>
             </pre>
-          )}
+          )} */}
           <div className={listPage.paginationContainer}>
             <Pagination pageCount={pageCount} onPageChange={handlePageChange} />
           </div>

@@ -43,3 +43,10 @@ export const ChordWithChartsSchema = ChordSchema.extend({
 
 
 export type ChordWithChartsModel = z.infer<typeof ChordWithChartsSchema>;
+
+export enum difficultyLevel {
+  UNKNOWN = 0,
+  EASY = 1,
+  MEDIUM = 2,
+  DIFFICULT =3
+}

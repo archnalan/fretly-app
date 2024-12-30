@@ -44,6 +44,7 @@ const Chord: React.FC = () => {
     }
     const timer = setTimeout(() => {
       setSuccessMessage("");
+      location.state = { successMessage: "" };      
     }, 5000);
     return () => clearTimeout(timer);
   }, [location.state]);
@@ -130,8 +131,7 @@ const Chord: React.FC = () => {
           (chord) =>
             String(chord.id).includes(normalizedQuery) ||
             String(chord.difficulty).includes(normalizedQuery) ||
-            chord.chordName.toLowerCase().includes(searchQuery) ||
-            chord.chartAudioFilePath?.toLowerCase().includes(searchQuery)
+            chord.chordName.toLowerCase().includes(searchQuery)
         );
         setfilteredChords(searchResult);
         setCurrentPageIndex(0); //display results on first page
@@ -247,20 +247,33 @@ const Chord: React.FC = () => {
             </div>
           </div>
           <div className="w-3/4 mt-[1.5rem]">
-            <ChordCard
-              charts={charts}
-              fetchChord={fetchChord}
-              currentChords={currentChords}
-              setOpenChordEdit={handleChordEdit}
-              setOpenConfirm={setOpenConfirm}
-              setToDelete={setToDelete}
-            />
+            {currentChords.length > 0 ? (
+              <ChordCard
+                charts={charts}
+                fetchChord={fetchChord}
+                currentChords={currentChords}
+                setOpenChordEdit={handleChordEdit}
+                setOpenConfirm={setOpenConfirm}
+                setToDelete={setToDelete}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 flex-grow gap-4 ">
+                {Array.from({ length: chordsPerPage }).map((_, index) => (
+                  <div key={index} className="flex w-52 flex-col gap-4">
+                    <div className="skeleton h-[15rem] w-full"></div>
+                    <div className="skeleton h-4 w-28"></div>
+                    <div className="skeleton h-5 w-full"></div>
+                    <div className="skeleton h-5 w-full"></div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {currentChords.length == 0 && (
+          {/* {currentChords.length == 0 && (
             <pre className={listPage.spinnerPreview}>
               <span className={listPage.spinnerSpan}></span>
             </pre>
-          )}
+          )}*/}
 
           <div className={listPage.paginationContainer}>
             <Pagination pageCount={pageCount} onPageChange={handlePageChange} />

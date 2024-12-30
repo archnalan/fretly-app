@@ -5,7 +5,11 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import ChartRequest from "../../API/ChartRequest";
 import { ChartModel, ChartSchema } from "../../DataModels/ChartModel";
 import { useThemeContext } from "../../Contexts/ThemeContext";
-import { ChordEditModel, ChordSchema } from "../../DataModels/ChordModel";
+import {
+  ChordEditModel,
+  ChordSchema,
+  difficultyLevel,
+} from "../../DataModels/ChordModel";
 import { idSchema } from "../../DataModels/ValidatedID";
 import ChordRequest from "../../API/ChordRequest";
 import ChordCarousel from "./ChordCarousel";
@@ -102,29 +106,47 @@ const ChordDetails: React.FC = () => {
         <hr className={detailsPage.line(theme)} />
 
         <div className={detailsPage.detailRow}>
-          <strong>Version</strong>
-          <span>{chord.difficulty}</span>
+          <strong>Difficulty</strong>
+          <span className="font-semibold text-primary">
+            {difficultyLevel[chord.difficulty ?? 0]}
+          </span>
         </div>
         <hr className={detailsPage.line(theme)} />
 
-        <div className="flex flex-col justify-start mb-2">
+        <div className={detailsPage.detailRow}>
           <strong className="mb-2">Charts</strong>
-          <div className="h-96">
-            <ChordCarousel charts={filteredCharts} chord={chord} />
-          </div>
+          {filteredCharts.length > 0 ? (
+            <figure className="w-full md:w-1/2 h-[15em] mb-2">
+              <ChordCarousel charts={filteredCharts} chord={chord} />
+            </figure>
+          ) : (
+            <figure className="h-[15em] mb-2">
+              <img
+                src="/src/assets/No-Image-Placeholder.svg.png"
+                alt="No chord image to show"
+                className="img-thumbnail bg-base-100"
+                style={{
+                  backgroundColor: `${theme === "dark" ? "#ddd" : ""}`,
+                  maxHeight: "15em",
+                  borderRadius: "0.5em",
+                  objectFit: "contain",
+                }}
+              />
+            </figure>
+          )}
         </div>
         <hr className={detailsPage.line(theme)} />
 
-        <div className="mt-2 d-flex justify-content-end mb-3">
+        <div className={detailsPage.buttonContainer}>
           <button
             onClick={() => navigate("/admin/chords")}
-            className="btn btn-outline-danger me-2"
+            className={detailsPage.backButton}
           >
             Back
           </button>
           <Link
             to={`/admin/chords/edit/${id}`}
-            className="btn btn-outline-primary"
+            className={detailsPage.editButton}
           >
             Edit
           </Link>
