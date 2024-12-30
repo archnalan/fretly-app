@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { RiStickyNoteAddFill } from "react-icons/ri";
 import Pagination from "../../Helper/Pagination";
 import { IoSearchOutline } from "react-icons/io5";
@@ -84,7 +84,7 @@ const Chord: React.FC = () => {
             chordDisplay.unshift(editedChord); //edited chord at 1st pstn
           }
         }
-        if(chordDisplay || newList){
+        if (chordDisplay || newList) {
           setChords(chordDisplay);
           setfilteredChords(chordDisplay);
         }
@@ -197,17 +197,16 @@ const Chord: React.FC = () => {
   const pageCount = Math.ceil(filteredChords.length / chordsPerPage);
   const offset = currentPageIndex * chordsPerPage;
   const currentChords = filteredChords.slice(offset, offset + chordsPerPage);
-
   return (
     <>
       <div className={listPage.container}>
         <div className={listPage.innerContainer(theme)}>
-          <h1 className={listPage.header}>List of Chords</h1>
+          <h1 className={listPage.header}> Chords</h1>
           {/* {successMessage && (
           <div className="w-75 alert alert-success text-wrap" role="alert">
             {successMessage}
           </div>
-        )} */}
+          )} */}
           {errorDelete && (
             <div className="w-3/4 alert alert-error text-wrap" role="alert">
               {errorDelete}
@@ -246,7 +245,8 @@ const Chord: React.FC = () => {
                 </button>
               </div>
             </div>
-
+          </div>
+          <div className="w-3/4 mt-[1.5rem]">
             <ChordCard
               charts={charts}
               fetchChord={fetchChord}
@@ -255,12 +255,13 @@ const Chord: React.FC = () => {
               setOpenConfirm={setOpenConfirm}
               setToDelete={setToDelete}
             />
-            {currentChords.length == 0 && (
-              <pre className={listPage.spinnerPreview}>
-                <span className={listPage.spinnerSpan}></span>
-              </pre>
-            )}
           </div>
+          {currentChords.length == 0 && (
+            <pre className={listPage.spinnerPreview}>
+              <span className={listPage.spinnerSpan}></span>
+            </pre>
+          )}
+
           <div className={listPage.paginationContainer}>
             <Pagination pageCount={pageCount} onPageChange={handlePageChange} />
           </div>

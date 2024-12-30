@@ -22,6 +22,7 @@ import ChordList from "./Chords/ChordList";
 import ChartList from "./Charts/ChartList";
 import ChartDetails from "./Charts/ChartDetails";
 import ChordCreate from "./Chords/ChordCreate";
+import ChordDetails from "./Chords/ChordDetails";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -55,8 +56,8 @@ const AdminRoutes: React.FC = () => {
           {/*<Route path="songbooks/edit/:id" element={<PageEdit />}></Route> */}
           {/* chords */}
           <Route path="chords" element={<ChordList />}></Route>
-          {/*<Route path="chords/:id" element={<ChordDetails />}></Route>
-          <Route path="chords/create/*" element={<ChordCreateRoutes />}></Route>
+          <Route path="chords/:id" element={<ChordDetails />}></Route>
+          {/*<Route path="chords/create/*" element={<ChordCreateRoutes />}></Route>
            */}
           {/*<Route path="chords/edit/:id" element={<PageEdit />}></Route> */}
           {/* charts */}

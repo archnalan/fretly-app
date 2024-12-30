@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { TbArrowBigLeft } from "react-icons/tb";
-import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
 import { detailsPage } from "../SharedClassNames/detailsPage";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import ChartRequest from "../../API/ChartRequest";
@@ -10,6 +8,7 @@ import { useThemeContext } from "../../Contexts/ThemeContext";
 import { ChordEditModel, ChordSchema } from "../../DataModels/ChordModel";
 import { idSchema } from "../../DataModels/ValidatedID";
 import ChordRequest from "../../API/ChordRequest";
+import ChordCarousel from "./ChordCarousel";
 
 const ChordDetails: React.FC = () => {
   const [chord, setChord] = useState<ChordEditModel>({
@@ -79,18 +78,20 @@ const ChordDetails: React.FC = () => {
     FetchCharts();
   }, []);
 
+  const filteredCharts = charts.filter((chart) => chart.chordId === chord.id);
+
   return (
     <div className={detailsPage.container}>
       <div className={detailsPage.innerContainer(theme)}>
-        <div className="flex items-center">
+        <div className={detailsPage.revertContainer}>
           <button
             onClick={() => navigate(-1)}
-            className={detailsPage.backHeaderButton}
+            className={detailsPage.revertButton}
           >
             <IoMdArrowRoundBack />
           </button>
           <h3 className={detailsPage.header}>
-            <strong>Chord Details</strong>
+            <span className="font-semibold">Chord Details</span>
           </h3>
         </div>
 
@@ -106,78 +107,17 @@ const ChordDetails: React.FC = () => {
         </div>
         <hr className={detailsPage.line(theme)} />
 
-        <div className="flex flex-col justify-start mb-3">
+        <div className="flex flex-col justify-start mb-2">
           <strong className="mb-2">Charts</strong>
-
-          <div id="carouselCharts" className="carousel slide">
-            <div className="carousel-inner">
-              {charts
-                .filter((chart) => chart.chordId === chord.id)
-                .map((chart, chartIndex) => (
-                  <div
-                    key={chart.id}
-                    className={`carousel-item ${
-                      chartIndex === 0 ? "active" : ""
-                    }`}
-                  >
-                    <img
-                      src={chart.filePath}
-                      alt={chord.chordName}
-                      className="block w-full card-img-top  img-thumbnail mb-2"
-                      style={{
-                        maxWidth: "25em",
-                        maxHeight: "15em",
-                        objectFit: "contain",
-                      }}
-                    />
-                    <h6 className="d-block text-center text-secondary ">
-                      Fret {chart.fretPosition}
-                    </h6>
-                  </div>
-                ))}
-            </div>
-            {charts.filter((chart) => chart.chordId === chord.id).length >
-              0 && (
-              <div>
-                <button
-                  className="carousel-control-prev text-dark"
-                  type="button"
-                  data-bs-target="#carouselCharts"
-                  data-bs-slide="prev"
-                >
-                  <MdOutlineNavigateBefore size={24} />
-                  <span className="visually-hidden">Previous</span>
-                </button>
-                <button
-                  className="carousel-control-next text-dark"
-                  type="button"
-                  data-bs-target="#carouselCharts"
-                  data-bs-slide="next"
-                >
-                  <MdOutlineNavigateNext size={24} />
-                  <span className="visually-hidden">Next</span>
-                </button>
-                <button
-                  className="carousel-control-next"
-                  type="button"
-                  data-bs-target="#carouselCharts"
-                  data-bs-slide="next"
-                >
-                  <span
-                    className="carousel-control-next-icon"
-                    aria-hidden="true"
-                  ></span>
-                  <span className="visually-hidden">Next</span>
-                </button>
-              </div>
-            )}
+          <div className="h-96">
+            <ChordCarousel charts={filteredCharts} chord={chord} />
           </div>
         </div>
         <hr className={detailsPage.line(theme)} />
 
-        <div className="d-flex justify-content-end mb-3">
+        <div className="mt-2 d-flex justify-content-end mb-3">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/admin/chords")}
             className="btn btn-outline-danger me-2"
           >
             Back

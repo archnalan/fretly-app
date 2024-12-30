@@ -133,7 +133,7 @@ const ChartList: React.FC = () => {
     <>
       <div className={listPage.container}>
         <div className={listPage.innerContainer(theme)}>
-          <h1 className={listPage.header}>List of Chord Charts</h1>
+          <h1 className={listPage.header}>Chord Charts</h1>
           {successMessage && (
             <div className={listPage.successAlert} role="alert">
               {successMessage}
