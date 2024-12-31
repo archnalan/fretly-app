@@ -147,11 +147,11 @@ const Page: React.FC = () => {
 
   return (
     <>
-      <div className="w-full h-full overflow-y-scroll relative">
+      <div className="w-full h-[100vh] overflow-y-scroll relative">
         <div
           className={`${
             theme === "dark" ? "text-neutral-300" : "text-dark"
-          } flex flex-col justify-start items-center bg-base-200 h-full`}
+          } flex flex-col justify-start items-center bg-base-200 h-[100vh]`}
         >
           {errorDelete && <ErrorMessage errorMessage={errorDelete} />}
 
@@ -189,12 +189,12 @@ const Page: React.FC = () => {
               </Link>
             </div>
           </div>
-
-          <div className="w-3/4 bg-base-100 p-2 ">
+          <div className="w-3/4 overflow-x-auto overflow-y-hidden h-fit">
             <table
-              className={`table w-full ${
+              className={`table bg-base-100 ${
                 theme === "dark" ? "text-neutral-300" : ""
               }`}
+              style={{ borderRadius: "0" }}
             >
               <thead className="text-base">
                 <tr>

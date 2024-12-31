@@ -194,7 +194,10 @@ const Song: React.FC = () => {
         </div>
 
         <div className={listPage.tableContainer}>
-          <table className={listPage.table(theme)}>
+          <table
+            className={listPage.table(theme)}
+            style={{ borderRadius: "0" }}
+          >
             <thead className={listPage.tableHead}>
               <tr>
                 <th>
