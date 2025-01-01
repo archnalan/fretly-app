@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Lyrics from "./Lyrics";
+import { FiDelete, FiEdit, FiTrash } from "react-icons/fi";
 
 const LyricLines = () => {
   const [lineNumbers, setLineNumbers] = useState<number[]>([1]);
@@ -26,33 +27,40 @@ const LyricLines = () => {
   };
 
   return (
-    <div className="w-full flex flex-col align-center justify-center border">
-      <div className="w-full flex flex-col align-center justify-center border">
-        <label>Enter lyrics</label>
+    <div className="w-full flex flex-col align-center justify-center ">
+      <div className="w-full flex flex-col align-center justify-center ">
         <p className="text-gray-600 text-sm p-[0.5rem_0.15rem_0.35rem]">
           Press Enter to add new lyric segment. Each segment can be assigned a
           chord.
         </p>
       </div>
-      <div className="w-3/4">
-        {lineNumbers.map((lineNumber) => (
+      <div className="w-full">
+        {lineNumbers.map((lineNumber, index) => (
           <div
             key={lineNumber}
             className="relative mb-[3rem]"
             id={`line-${lineNumber}`}
           >
             <Lyrics
-              lineNumber={lineNumber}
+              lineNumbering={index + 1}
               focused={focusedLine === lineNumber}
               onFocusLine={() => setFocusedLine(lineNumber)}
             />
             {focusedLine === lineNumber && (
-              <button
-                className="btn btn-secondary btn-sm absolute bottom-[-2rem] right-1/2 rounded-t-none"
-                onClick={() => addLine(lineNumber)}
-              >
-                Add Line
-              </button>
+              <div className="absolute bottom-[-2rem] right-7">
+                <button
+                  className="btn btn-sm rounded-t-none rounded-r-none text-primary border-info border-t-0 border-r-0"
+                  onClick={() => addLine(lineNumber)}
+                >
+                  <FiEdit /> New
+                </button>
+                <button
+                  className="btn btn-sm rounded-t-none rounded-l-none text-error border-info border-t-0 "
+                  onClick={() => handleLineDelete(lineNumber)}
+                >
+                  <FiTrash /> Rem
+                </button>
+              </div>
             )}
             <button
               className="btn btn-sm btn-ghost absolute top-1 right-1 rounded-full text-error"

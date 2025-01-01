@@ -24,8 +24,9 @@ import ChartDetails from "./Charts/ChartDetails";
 import ChordCreate from "./Chords/ChordCreate";
 import ChordDetails from "./Chords/ChordDetails";
 import ChartCreate from "./Charts/ChartCreate";
-import Lyrics from "./Chodify/components/Verse/Lyrics";
-import LyricLines from "./Chodify/components/Verse/LyricLines";
+import Lyrics from "./Chodify/components/Verses/Lyrics";
+import LyricLines from "./Chodify/components/Verses/LyricLines";
+import Verses from "./Chodify/components/Verses/Verses";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -72,7 +73,7 @@ const AdminRoutes: React.FC = () => {
           <Route path="chordcharts/edit/:id" element={<PageEdit />}></Route> */}
           {/* */}
           {/* test routes*/}
-          <Route path="tags" element={<LyricLines />}></Route>
+          <Route path="tags" element={<Verses />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
