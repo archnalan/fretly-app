@@ -27,9 +27,9 @@ const LyricLines = () => {
   };
 
   return (
-    <div className="w-full flex flex-col align-center justify-center ">
+    <div className="w-full flex flex-col align-center justify-center gap-1">
       <div className="w-full flex flex-col align-center justify-center ">
-        <p className="text-gray-600 text-sm p-[0.5rem_0.15rem_0.35rem]">
+        <p className="text-gray-600 text-sm p-[0.5rem_0.15rem_0.35rem] ">
           Press Enter to add new lyric segment. Each segment can be assigned a
           chord.
         </p>
@@ -38,7 +38,7 @@ const LyricLines = () => {
         {lineNumbers.map((lineNumber, index) => (
           <div
             key={lineNumber}
-            className="relative mb-[3rem]"
+            className="relative mb-[2.5rem]"
             id={`line-${lineNumber}`}
           >
             <Lyrics
@@ -47,7 +47,7 @@ const LyricLines = () => {
               onFocusLine={() => setFocusedLine(lineNumber)}
             />
             {focusedLine === lineNumber && (
-              <div className="absolute bottom-[-2rem] right-7">
+              <div className="absolute bottom-[-2rem] right-7 ">
                 <button
                   className="btn btn-sm rounded-t-none rounded-r-none text-primary border-info border-t-0 border-r-0"
                   onClick={() => addLine(lineNumber)}
@@ -56,9 +56,13 @@ const LyricLines = () => {
                 </button>
                 <button
                   className="btn btn-sm rounded-t-none rounded-l-none text-error border-info border-t-0 "
-                  onClick={() => handleLineDelete(lineNumber)}
+                  onClick={() => {
+                    lineNumbers.length === 1
+                      ? window.location.reload
+                      : handleLineDelete(lineNumber);
+                  }}
                 >
-                  <FiTrash /> Rem
+                  <FiTrash /> Del
                 </button>
               </div>
             )}

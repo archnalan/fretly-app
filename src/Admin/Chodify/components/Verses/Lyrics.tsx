@@ -29,6 +29,10 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
       },
     }));
 
+    const ClearLyrics = () => {
+      setLyrics([]);
+    };
+
     useEffect(() => {
       if (focused && inputRef.current) {
         inputRef.current.focus();
@@ -77,7 +81,7 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
               </div>
             )}
             <div
-              className={`p-[0_0rem] h-[2rem] flex align-center justify-between gap-[0.6rem] rounded-sm text-base-100 mb-[2rem] ${
+              className={`p-[0_0rem] h-[2rem] flex align-center justify-between gap-[0.6rem] rounded-sm text-base-100 mt-[1rem] ${
                 focused ? " bg-neutral" : "bg-neutral-content"
               }`}
             >
@@ -118,7 +122,7 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
             id="lyric-input"
             autoComplete="off"
             placeholder="Enter lyric segment..."
-            className="h-[2rem] p-0 outline-none border-none text-lg w-[12rem] bg-transparent "
+            className="h-[2rem] p-0 outline-none border-none text-lg w-[12rem] bg-transparent mt-[1rem]"
             value={lyric}
             maxLength={50}
             onChange={(e) => setLyric(e.target.value)}
