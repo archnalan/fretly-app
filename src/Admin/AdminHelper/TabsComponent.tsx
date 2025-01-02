@@ -8,40 +8,59 @@ type TabsProps = {
   itemsCountLimit?: number;
 };
 const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
-  const [selectedTab, setSelectedTab] = useState(0);
   const [items, setItems] = useState<Item[]>(initialItems);
   const firstBtnRef = useRef<HTMLDivElement | null>(null);
+  const INITIAL_ID = 1;
+  const [selectedTab, setSelectedTab] = useState(INITIAL_ID);
+
+  useEffect(() => {
+    const updatedItems = initialItems.map((item, index) => ({
+      ...item,
+      id: INITIAL_ID + index,
+    }));
+    setItems(updatedItems);
+  }, [initialItems]);
 
   useEffect(() => {
     firstBtnRef.current?.focus();
   }, []);
 
-  const handleTabRemove = (index: number) => {
-    console.log("🚀 ~ handleTabRemove ~ index:", index);
-    setItems((prevItems) => prevItems.filter((_, i) => i !== index));
-    if (selectedTab >= items.length) {
-      console.log("🚀 ~ setTimeout ~ selectedTab:", selectedTab);
-      setSelectedTab(items.length - 1);
-    }
+  const handleTabRemove = (id: number) => {
+    setItems((prevItems) => {
+      const updatedItems = prevItems.filter((item) => item.id !== id);
+      const selectedTabIndex = prevItems.findIndex(
+        (item) => item.id === selectedTab
+      );
+
+      // once selected tab is removed
+      if (selectedTab === id) {
+        if (selectedTabIndex === 0 && updatedItems.length > 0) {
+          setSelectedTab(updatedItems[0].id); // Select the next item if the first tab is removed
+        } else if (selectedTabIndex > 0) {
+          setSelectedTab(prevItems[selectedTabIndex - 1].id); // Select previous item
+        } else {
+          setSelectedTab(INITIAL_ID);
+        }
+      }
+
+      return updatedItems;
+    });
   };
 
   const handleAddTab = () => {
-    if (itemsCountLimit && items.length >= itemsCountLimit) return;
-    const lastId = items[items.length - 1].id;
-    const newId = lastId + 1;
-    console.log("🚀 ~ handleAddTab ~ newId:", newId);
+    {
+      if (itemsCountLimit && items.length >= itemsCountLimit) return;
+      const newId =
+        items.length > 0 ? items[items.length - 1].id + 1 : INITIAL_ID;
+      const newTab: Item = {
+        id: newId,
+        title: initialItems[0].title,
+        content: initialItems[0].content,
+      };
 
-    const newTab: Item = {
-      id: newId,
-      title: initialItems[0].title,
-      content: initialItems[0].content,
-    };
-
-    setItems((prevItems) => {
-      const newItems = [...prevItems, newTab];
-      setSelectedTab(newItems.length - 1);
-      return newItems;
-    });
+      setItems((prevItems) => [...prevItems, newTab]);
+      setSelectedTab(newId);
+    }
   };
   return (
     <div className="bg-base-200 flex justify-center items-center py-4">
@@ -49,8 +68,8 @@ const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
         <div className=" p-1  rounded-xl flex justify-start flex-wrap items-center gap-x-2 font-semibold text-primary">
           {items.map((item, index) => (
             <div
-              key={item.id}
-              ref={item.id === 0 ? firstBtnRef : null}
+              key={index}
+              ref={item.id === INITIAL_ID ? firstBtnRef : null}
               className={`outline-none min-w-fit p-2 flex items-center rounded-xl text-cneter focus:ring-2 focus:bg-base-100 focus:text-primary ${
                 selectedTab === item.id
                   ? "ring-2 bg-base-100 text-primary"
@@ -68,20 +87,20 @@ const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
                   className="btn btn-sm btn-circle btn-ghost right-2 top-2 "
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleTabRemove(index);
+                    handleTabRemove(item.id);
                   }}
                   disabled={items.length === 1}
                 >
                   <IoClose className="font-bold text-md" />
                 </button>
-                <div className="h-[100%] w-[0.01em] bg-base-200 border border-base-100 "></div>
+                <div className="h-[100%] w-[0.01em] bg-base-100 border border-base-100 self-stretch"></div>
               </div>
             </div>
           ))}
           <div className="flex align-center gap-1 ">
             <button
               className="btn btn-ghost btn-circle btn-sm "
-              onClick={handleAddTab}
+              onClick={() => handleAddTab()}
               disabled={items.length > 11}
             >
               <IoMdAdd />
@@ -90,9 +109,9 @@ const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
         </div>
 
         <div className="bg-base-200 p-2 rounded-xl">
-          {items.map((item, index) => (
+          {items.map((item) => (
             <div
-              key={index}
+              key={item.id}
               className={`${selectedTab === item.id ? "" : "hidden"}`}
             >
               {item.content}

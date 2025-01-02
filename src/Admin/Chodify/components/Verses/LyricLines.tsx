@@ -24,6 +24,9 @@ const LyricLines = () => {
   const handleLineDelete = (lineNumber: number) => {
     const newLineNumbers = lineNumbers.filter((num) => num !== lineNumber);
     setLineNumbers(newLineNumbers);
+    if (lineNumber === focusedLine) {
+      setFocusedLine(lineNumber - 1);
+    }
   };
 
   return (

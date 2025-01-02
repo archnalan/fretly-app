@@ -25,7 +25,7 @@ const Verses = () => {
   };
 
   const TabItems: Item[] = verses.map((verse, index) => ({
-    id: index,
+    id: index + 1,
     title: <label>Verse</label>,
     content: (
       <div className="w-full">

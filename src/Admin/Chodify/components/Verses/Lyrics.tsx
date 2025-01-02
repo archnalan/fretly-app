@@ -60,8 +60,8 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
     return (
       <div
         tabIndex={0}
-        className={`w-full border rounded-2xl p-[4rem_2rem_1rem] flex gap-3 flex-wrap bg-base-100 ${
-          focused ? "border-info" : ""
+        className={`w-full border rounded-2xl p-[4rem_2rem_1rem] flex gap-3 flex-wrap bg-base-100  ${
+          focused ? "ring-1 border-info" : ""
         }`}
         onFocus={onFocusLine}
       >
@@ -122,7 +122,7 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
             id="lyric-input"
             autoComplete="off"
             placeholder="Enter lyric segment..."
-            className="h-[2rem] p-0 outline-none border-none text-lg w-[12rem] bg-transparent mt-[1rem]"
+            className="h-[2rem] p-0 flex-grow outline-none border-none text-lg w-[12rem] bg-transparent mt-[1rem]"
             value={lyric}
             maxLength={50}
             onChange={(e) => setLyric(e.target.value)}
