@@ -27,6 +27,8 @@ import ChartCreate from "./Charts/ChartCreate";
 import Lyrics from "./Chodify/components/Verses/Lyrics";
 import LyricLines from "./Chodify/components/Verses/LyricLines";
 import Verses from "./Chodify/components/Verses/Verses";
+import { CustomKanban } from "./AdminHelper/CustomKanban";
+import { VerseBoard } from "./AdminHelper/VerseBoard";
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -74,6 +76,8 @@ const AdminRoutes: React.FC = () => {
           {/* */}
           {/* test routes*/}
           <Route path="tags" element={<Verses />}></Route>
+          <Route path="kanban" element={<CustomKanban />}></Route>
+          <Route path="board" element={<VerseBoard />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>

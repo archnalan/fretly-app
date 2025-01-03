@@ -65,7 +65,7 @@ const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
   return (
     <div className="bg-base-200 flex justify-center items-center py-4">
       <div className="flex flex-col w-full">
-        <div className=" p-1  rounded-xl flex justify-start flex-wrap items-center gap-x-2 font-semibold text-primary">
+        <div className=" p-1 ring-2  rounded-xl flex justify-start flex-wrap items-center gap-x-2 font-semibold text-primary">
           {items.map((item, index) => (
             <div
               key={index}
@@ -73,7 +73,7 @@ const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
               className={`outline-none min-w-fit p-2 flex items-center rounded-xl text-cneter focus:ring-2 focus:bg-base-100 focus:text-primary ${
                 selectedTab === item.id
                   ? "ring-2 bg-base-100 text-primary"
-                  : "hover:bg-blue-300"
+                  : "hover:bg-opacity-50 "
               } `}
               onClick={() => setSelectedTab(item.id)}
             >

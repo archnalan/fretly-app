@@ -5,7 +5,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import { FaCaretUp } from "react-icons/fa";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import AddChord from "./AddChord";
 
 type LyricsProps = {
@@ -87,7 +87,7 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
             >
               <span
                 className={`flex-1 ml-2 text-sm overflow-hidden text-ellipsis self-center ${
-                  focused ? "text-base" : "text-neutral"
+                  focused ? "" : "text-neutral"
                 }`}
               >
                 {lyric}
@@ -110,7 +110,11 @@ const Lyrics = forwardRef<HTMLInputElement, LyricsProps>(
                     );
                   }}
                 >
-                  <FaCaretUp />
+                  {currentChordIndex === index ? (
+                    <FaCaretDown />
+                  ) : (
+                    <FaCaretUp />
+                  )}
                 </div>
               </div>
             </div>

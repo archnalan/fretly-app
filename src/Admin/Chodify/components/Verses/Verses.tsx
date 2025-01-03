@@ -74,75 +74,14 @@ const Verses = () => {
     []
   ); */
   return (
-    <TabsComponent initialItems={TabItems} itemsCountLimit={MAX_VERSES}>
-      {/* <div
-      className="w-full tabs tabs-lifted relative"
-      role="tablist"
-      id="song 1"
-    >
-      {verses.map((stanza, index) => (
-        <React.Fragment key={index}>
-          {/* <input
-            type="radio"
-            name="my_tabs_2"
-            role="tab"
-            className="tab"
-            aria-label={`Verse ${index + 1}`}
-            id={`tab-${stanza}`}
-          /> 
-          <label
-            htmlFor={`tab-${stanza}`}
-            className="w-full tab"
-            role="tab"
-            id={`tab-${stanza}`}
-            onClick={() => setActiveVerse(stanza)}
-          >
-            <span>{`Verse ${index + 1}`}</span>
-            <button
-              type="button"
-              className="icon-button"
-              aria-label={`Remove verse ${index}`}
-              onClick={() => handleVerseRemove(stanza)}
-            >
-              <IoClose />
-            </button>
-          </label>
-          <div
-            role="tabpanel"
-            className="tab-content bg-base-100 border-base-300 rounded-box p-6"
-          >
-            <label>Enter lyrics for stanza {stanza}</label>
-            <LyricLines />
-          </div>
-          {/* <div className="absolute flex top-1 right-1 ">
-            <span
-              className="badge-ghost rounded-full cursor-pointer"
-              onClick={addVerseTab}
-            >
-              <IoMdAdd />
-            </span>
-            {verses.length > 1 && (
-              <span
-                className="badge-ghost rounded-full cursor-pointer"
-                onClick={() => handleVerseRemove(verse)}
-              >
-                &times;
-              </span>
-            )}
-          </div> 
-        </React.Fragment>
-      ))}
-      <div className="right-1/2">
-        <button
-          className="btn btn-ghost btn-circle btn-sm "
-          onClick={addVerseTab}
-          disabled={verses.length > 11}
-        >
-          <IoMdAdd />
-        </button>
+    <div className="w-full p-3 h-full overflow-y-auto flex flex-col items-center bg-base-200 ">
+      <div className="w-3/4 mb-[3rem]">
+        <TabsComponent
+          initialItems={TabItems}
+          itemsCountLimit={MAX_VERSES}
+        ></TabsComponent>
       </div>
-    </div> */}
-    </TabsComponent>
+    </div>
   );
 };
 
