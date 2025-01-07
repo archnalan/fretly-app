@@ -134,6 +134,7 @@ interface BurnBarrelProps {
 
 interface AddSegmentProps {
   lyricLine: string;
+  focused: boolean;
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
   setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
 }
@@ -353,7 +354,7 @@ const Segment: React.FC<
         onDragStart={(e) =>
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
-        className={`cursor-grab rounded border p-3 active:cursor-grabbing ${
+        className={`cursor-grab rounded p-3 active:cursor-grabbing ${
           focused ? "bg-neutral" : "bg-neutral/65"
         }`}
       >
@@ -473,16 +474,18 @@ const AddSegment: React.FC<AddSegmentProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 rounded border border-neutral-700 bg-neutral-800/60 p-3"
+      className={`flex items-center gap-2 rounded p-3 ${
+        focused ? " bg-neutral" : "  bg-neutral-800/10"
+      }`}
     >
-      <div className="h-full flex flex-col justify-between ">
-        <label htmlFor="chord" className="text-xs text-neutral-400">
+      {/*  <div className="h-full flex flex-col justify-between ">
+        <label htmlFor="chord" className="text-xs text-neutral">
           chord
         </label>
-        <label htmlFor="segment" className="text-xs text-neutral-400">
+        <label htmlFor="segment" className="text-xs text-neutral">
           Segment
         </label>
-      </div>
+      </div> */}
       <div className="flex flex-col justify-between gap-2">
         <div className="flex">
           <input
@@ -491,18 +494,19 @@ const AddSegment: React.FC<AddSegmentProps> = ({
             onChange={(e) => setChord(e.target.value)}
             type="text"
             autoComplete="off"
-            className="rounded bg-neutral-900 text-neutral-200 outline-none mr-2"
+            placeholder="chord here..."
+            className="rounded bg-base-200 text-neutral outline-none mr-2 placeholder:text-xs border border-neutral-700"
           />
           <button
             type="button"
             onClick={() => setForm(false)}
-            className="rounded border border-neutral-700 bg-neutral-900 px-2  text-sm text-neutral-100 me-1"
+            className="rounded border border-neutral-700  px-2  text-neutral-900 me-1"
           >
-            <span className="text-xs text-neutral-400">Cancel</span>
+            <span className="text-xs ">Cancel</span>
           </button>
           <button
             type="submit"
-            className="rounded border border-neutral-700 bg-neutral-900 px-2 text-sm text-neutral-100"
+            className="rounded bg-primary px-2 text-sm text-neutral-100"
           >
             Save
           </button>
@@ -513,8 +517,9 @@ const AddSegment: React.FC<AddSegmentProps> = ({
           value={segment}
           onChange={(e) => setSegment(e.target.value)}
           type="text"
+          placeholder="lyric segment here..."
           autoComplete="off"
-          className="rounded bg-neutral-900 text-neutral-200 outline-none"
+          className="rounded bg-base-200 text-neutral outline-none placeholder:text-xs border border-neutral-700"
         />
       </div>
     </form>
