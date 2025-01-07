@@ -10,6 +10,11 @@ interface SegmentType {
   chordId?: string;
 }
 
+interface ChordType {
+  id: string;
+  chord: string;
+}
+
 const DEFAULT_SONG: SegmentType[] = [
   // LINE 01
   {
@@ -25,7 +30,7 @@ const DEFAULT_SONG: SegmentType[] = [
   {
     segment: "sound",
     id: "5",
-    lyricLine: "5",
+    lyricLine: "2",
     chordId: "1",
   },
   // LINE 03
@@ -83,10 +88,37 @@ const DEFAULT_SONG: SegmentType[] = [
   },
 ];
 
+const DEFAULT_SONG_CHORDS: ChordType[] = [
+  {
+    id: "1",
+    chord: "G",
+  },
+  {
+    id: "17",
+    chord: "G7",
+  },
+  {
+    id: "5",
+    chord: "D",
+  },
+  {
+    id: "4",
+    chord: "C",
+  },
+  {
+    id: "6",
+    chord: "Em",
+  },
+];
+
 interface RowProps {
   line: string;
+  focused: boolean;
   segments: SegmentType[];
+  chords: ChordType[];
+  setFocus: React.Dispatch<React.SetStateAction<number | null>>;
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
+  setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
 }
 
 interface DropIndicatorProps {
@@ -96,16 +128,18 @@ interface DropIndicatorProps {
 
 interface BurnBarrelProps {
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
+  setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
 }
 
 interface AddSegmentProps {
   lyricLine: string;
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
+  setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
 }
 
 export const VerseBoard: React.FC = () => {
   return (
-    <div className="h-screen w-full bg-neutral-900 text-neutral-50">
+    <div className="h-screen w-full bg-base-200 text-neutral overflow-y-auto">
       <Board />
     </div>
   );
@@ -113,25 +147,42 @@ export const VerseBoard: React.FC = () => {
 
 const Board: React.FC = () => {
   const [segments, setSegments] = useState<SegmentType[]>(DEFAULT_SONG);
+  const [chords, setChords] = useState<ChordType[]>(DEFAULT_SONG_CHORDS);
+  const [focusedRow, setFocusedRow] = useState<number | null>(null);
 
   const lines = [...new Set(segments.map((segment) => segment.lyricLine))];
 
   return (
     <div className="flex flex-col h-full w-full gap-3 p-12 overflow-scroll">
-      {lines.map((line) => (
+      <p className="text-gray-600 text-sm ">
+        Each segment can be assigned a chord.
+      </p>
+      {lines.map((line, index) => (
         <Row
           key={line}
           line={line}
+          focused={focusedRow === index}
+          setFocus={setFocusedRow}
           segments={segments}
           setSegments={setSegments}
+          chords={chords}
+          setChords={setChords}
         />
       ))}
-      <BurnBarrel setSegments={setSegments} />
+      <BurnBarrel setSegments={setSegments} setChords={setChords} />
     </div>
   );
 };
 
-const Row: React.FC<RowProps> = ({ line, segments, setSegments }) => {
+const Row: React.FC<RowProps> = ({
+  line,
+  focused,
+  setFocus,
+  segments,
+  chords,
+  setSegments,
+  setChords,
+}) => {
   const [active, setActive] = useState(false);
 
   const handleDragStart = (e: DragEvent, segment: SegmentType) => {
@@ -151,6 +202,7 @@ const Row: React.FC<RowProps> = ({ line, segments, setSegments }) => {
 
     if (before !== segmentId) {
       let copy = [...segments];
+      let chordsCopy = [...chords];
 
       let segmentToTransfer = copy.find((s) => s.id === segmentId);
       if (!segmentToTransfer) return;
@@ -234,25 +286,43 @@ const Row: React.FC<RowProps> = ({ line, segments, setSegments }) => {
   };
 
   const filteredSegments = segments.filter((s) => s.lyricLine === line);
-
   return (
-    <div className="flex mb-6">
-      <div className="mr-3 flex items-center justify-center">
-        <h3 className="font-medium text-neutral-500">Line {line}</h3>
-      </div>
+    <div
+      tabIndex={0}
+      className={`w-full relative p-[2.5rem_2rem_1rem] flex gap-3 flex-wrap  ${
+        focused ? "ring-1 border-info" : ""
+      }`}
+    >
+      <label
+        className={`absolute top-2 left-2 badge ${
+          focused ? " badge-primary  " : "badge-ghost"
+        }`}
+      >
+        Lyric Line {line.padStart(2, "0")}
+      </label>
+
       <div
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`flex h-full w-full gap-3 transition-colors ${
-          active ? "bg-neutral-800/50" : "bg-neutral-800/0"
+        className={`flex flex-wrap h-full w-full gap-1 transition-colors ${
+          active ? "bg-neutral/15" : "bg-neutral/0"
         }`}
       >
         {filteredSegments.map((s) => (
-          <Segment key={s.id} {...s} handleDragStart={handleDragStart} />
+          <Segment
+            key={s.id}
+            {...s}
+            chords={chords}
+            handleDragStart={handleDragStart}
+          />
         ))}
         <DropIndicator beforeId={null} lyricLine={line} />
-        <AddSegment lyricLine={line} setSegments={setSegments} />
+        <AddSegment
+          lyricLine={line}
+          setSegments={setSegments}
+          setChords={setChords}
+        />
       </div>
     </div>
   );
@@ -260,9 +330,12 @@ const Row: React.FC<RowProps> = ({ line, segments, setSegments }) => {
 
 const Segment: React.FC<
   SegmentType & {
+    chords: ChordType[];
     handleDragStart: (e: DragEvent, segment: SegmentType) => void;
   }
-> = ({ segment, id, lyricLine, chordId, handleDragStart }) => {
+> = ({ segment, id, chords, lyricLine, chordId, handleDragStart }) => {
+  const chord = chords.find((c) => c.id === chordId)?.chord || ""; // Match chordId to find the chord.
+
   return (
     <>
       <DropIndicator beforeId={id} lyricLine={lyricLine} />
@@ -273,9 +346,12 @@ const Segment: React.FC<
         onDragStart={(e) =>
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
-        className="cursor-grab rounded border border-neutral-700 bg-neutral-800 p-3 active:cursor-grabbing"
+        className="cursor-grab rounded border bg-neutral p-3 active:cursor-grabbing"
       >
-        <p className="text-sm text-neutral-100">{segment}</p>
+        <div className="h-full flex flex-col justify-between">
+          <p className="text-sm text-neutral-100">{chord}</p>
+          <p className="text-sm text-neutral-100">{segment}</p>
+        </div>
       </motion.div>
     </>
   );
@@ -331,7 +407,11 @@ const BurnBarrel: React.FC<BurnBarrelProps> = ({ setSegments }) => {
   );
 };
 
-const AddSegment: React.FC<AddSegmentProps> = ({ lyricLine, setSegments }) => {
+const AddSegment: React.FC<AddSegmentProps> = ({
+  lyricLine,
+  setSegments,
+  setChords,
+}) => {
   const [form, setForm] = useState(false);
   const [segment, setSegment] = useState("");
   const [chord, setChord] = useState("");
@@ -339,18 +419,29 @@ const AddSegment: React.FC<AddSegmentProps> = ({ lyricLine, setSegments }) => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!segment) return;
+    /*  if (!chord) return; */
 
-    setSegments((pv) => {
-      const newSegment: SegmentType = {
+    setChords((pv: ChordType[]) => {
+      const newChord: ChordType = {
         id: Date.now().toString(),
-        segment,
-        lyricLine,
+        chord,
       };
+      setSegments((pv) => {
+        const newSegment: SegmentType = {
+          id: Date.now().toString(),
+          segment,
+          lyricLine,
+          chordId: newChord.id,
+        };
 
-      return [...pv, newSegment];
+        return [...pv, newSegment];
+      });
+
+      return [...pv, newChord];
     });
 
     setSegment("");
+    setChord("");
     setForm(false);
   };
 
@@ -358,7 +449,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({ lyricLine, setSegments }) => {
     return (
       <button
         onClick={() => setForm(true)}
-        className="mt-3 flex items-center gap-2 rounded border border-dashed border-neutral-700 bg-neutral-800/60 px-2 py-1.5 text-sm text-neutral-400"
+        className="flex items-center gap-2 rounded border border-dashed border-neutral-700 bg-neutral-800/10 px-2 py-1.5 text-sm text-neutral"
       >
         <FiPlus /> Add a segment
       </button>
@@ -368,9 +459,9 @@ const AddSegment: React.FC<AddSegmentProps> = ({ lyricLine, setSegments }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 flex gap-2 rounded border border-neutral-700 bg-neutral-800/60 p-3"
+      className="flex items-center gap-2 rounded border border-neutral-700 bg-neutral-800/60 p-3"
     >
-      <div className="flex flex-col justify-between ">
+      <div className="h-full flex flex-col justify-between ">
         <label htmlFor="chord" className="text-xs text-neutral-400">
           chord
         </label>
@@ -386,27 +477,18 @@ const AddSegment: React.FC<AddSegmentProps> = ({ lyricLine, setSegments }) => {
             onChange={(e) => setChord(e.target.value)}
             type="text"
             autoComplete="off"
-            className="rounded bg-neutral-900 p-1.5 text-neutral-200 outline-none mr-2"
+            className="rounded bg-neutral-900 text-neutral-200 outline-none mr-2"
           />
-          <div className="flex flex-col justify-between gap-1 mr-1">
-            <button
-              type="button"
-              onClick={() => setForm(false)}
-              className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100"
-            >
-              <span className="text-xs text-neutral-400">Cancel</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm(false)}
-              className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100"
-            >
-              <span className="text-xs text-neutral-400">New chord</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setForm(false)}
+            className="rounded border border-neutral-700 bg-neutral-900 px-2  text-sm text-neutral-100 me-1"
+          >
+            <span className="text-xs text-neutral-400">Cancel</span>
+          </button>
           <button
             type="submit"
-            className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100"
+            className="rounded border border-neutral-700 bg-neutral-900 px-2 text-sm text-neutral-100"
           >
             Save
           </button>
@@ -418,7 +500,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({ lyricLine, setSegments }) => {
           onChange={(e) => setSegment(e.target.value)}
           type="text"
           autoComplete="off"
-          className="rounded bg-neutral-900 p-1.5 text-neutral-200 outline-none"
+          className="rounded bg-neutral-900 text-neutral-200 outline-none"
         />
       </div>
     </form>

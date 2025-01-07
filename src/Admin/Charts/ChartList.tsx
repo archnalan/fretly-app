@@ -239,7 +239,10 @@ const ChartList: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 flex-grow gap-4 ">
                 {Array.from({ length: chartsPerPage }).map((_, index) => (
-                  <div key={index} className="flex w-52 flex-col gap-4">
+                  <div
+                    key={index}
+                    className="flex w-52 flex-col gap-4 shrink-0"
+                  >
                     <div className="skeleton h-[15rem] w-full"></div>
                     <div className="skeleton h-4 w-28"></div>
                     <div className="skeleton h-5 w-full"></div>
