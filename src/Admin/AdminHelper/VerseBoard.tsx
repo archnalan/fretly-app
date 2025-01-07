@@ -116,9 +116,10 @@ interface RowProps {
   focused: boolean;
   segments: SegmentType[];
   chords: ChordType[];
-  setFocus: React.Dispatch<React.SetStateAction<number | null>>;
+  setFocus: React.Dispatch<React.SetStateAction<string | null>>;
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
   setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
+  onFocusRow: () => void;
 }
 
 interface DropIndicatorProps {
@@ -148,7 +149,7 @@ export const VerseBoard: React.FC = () => {
 const Board: React.FC = () => {
   const [segments, setSegments] = useState<SegmentType[]>(DEFAULT_SONG);
   const [chords, setChords] = useState<ChordType[]>(DEFAULT_SONG_CHORDS);
-  const [focusedRow, setFocusedRow] = useState<number | null>(null);
+  const [focusedRow, setFocusedRow] = useState<string | null>(null);
 
   const lines = [...new Set(segments.map((segment) => segment.lyricLine))];
 
@@ -157,16 +158,17 @@ const Board: React.FC = () => {
       <p className="text-gray-600 text-sm ">
         Each segment can be assigned a chord.
       </p>
-      {lines.map((line, index) => (
+      {lines.map((line) => (
         <Row
           key={line}
           line={line}
-          focused={focusedRow === index}
+          focused={focusedRow === line}
           setFocus={setFocusedRow}
           segments={segments}
           setSegments={setSegments}
           chords={chords}
           setChords={setChords}
+          onFocusRow={() => setFocusedRow(line)}
         />
       ))}
       <BurnBarrel setSegments={setSegments} setChords={setChords} />
@@ -178,6 +180,7 @@ const Row: React.FC<RowProps> = ({
   line,
   focused,
   setFocus,
+  onFocusRow,
   segments,
   chords,
   setSegments,
@@ -290,12 +293,13 @@ const Row: React.FC<RowProps> = ({
     <div
       tabIndex={0}
       className={`w-full relative p-[2.5rem_2rem_1rem] flex gap-3 flex-wrap  ${
-        focused ? "ring-1 border-info" : ""
+        focused ? "ring-1 rounded-2xl ring-primary" : ""
       }`}
+      onFocus={onFocusRow}
     >
       <label
-        className={`absolute top-2 left-2 badge ${
-          focused ? " badge-primary  " : "badge-ghost"
+        className={`absolute top-2 left-10 badge ${
+          focused ? " badge-primary  " : ""
         }`}
       >
         Lyric Line {line.padStart(2, "0")}
@@ -315,6 +319,7 @@ const Row: React.FC<RowProps> = ({
             {...s}
             chords={chords}
             handleDragStart={handleDragStart}
+            focused={focused}
           />
         ))}
         <DropIndicator beforeId={null} lyricLine={line} />
@@ -322,6 +327,7 @@ const Row: React.FC<RowProps> = ({
           lyricLine={line}
           setSegments={setSegments}
           setChords={setChords}
+          focused={focused}
         />
       </div>
     </div>
@@ -331,9 +337,10 @@ const Row: React.FC<RowProps> = ({
 const Segment: React.FC<
   SegmentType & {
     chords: ChordType[];
+    focused: boolean;
     handleDragStart: (e: DragEvent, segment: SegmentType) => void;
   }
-> = ({ segment, id, chords, lyricLine, chordId, handleDragStart }) => {
+> = ({ segment, id, chords, focused, lyricLine, chordId, handleDragStart }) => {
   const chord = chords.find((c) => c.id === chordId)?.chord || ""; // Match chordId to find the chord.
 
   return (
@@ -346,7 +353,9 @@ const Segment: React.FC<
         onDragStart={(e) =>
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
-        className="cursor-grab rounded border bg-neutral p-3 active:cursor-grabbing"
+        className={`cursor-grab rounded border p-3 active:cursor-grabbing ${
+          focused ? "bg-neutral" : "bg-neutral/65"
+        }`}
       >
         <div className="h-full flex flex-col justify-between">
           <p className="text-sm text-neutral-100">{chord}</p>
@@ -411,6 +420,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({
   lyricLine,
   setSegments,
   setChords,
+  focused,
 }) => {
   const [form, setForm] = useState(false);
   const [segment, setSegment] = useState("");
@@ -449,7 +459,11 @@ const AddSegment: React.FC<AddSegmentProps> = ({
     return (
       <button
         onClick={() => setForm(true)}
-        className="flex items-center gap-2 rounded border border-dashed border-neutral-700 bg-neutral-800/10 px-2 py-1.5 text-sm text-neutral"
+        className={`flex items-center gap-2 rounded border border-dashed  px-2 py-1.5 text-sm  ${
+          focused
+            ? "text-neutral border-neutral-700 bg-neutral-800/10"
+            : "text-neutral/50 border-neutral-300 bg-neutral-800/5"
+        }`}
       >
         <FiPlus /> Add a segment
       </button>
