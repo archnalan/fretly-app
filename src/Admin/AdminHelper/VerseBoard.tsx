@@ -1,5 +1,5 @@
-import React, { useState, DragEvent, FormEvent } from "react";
-import { FiPlus, FiTrash } from "react-icons/fi";
+import React, { useState, DragEvent, FormEvent, useEffect } from "react";
+import { FiEdit, FiPlus, FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
 
@@ -151,8 +151,43 @@ const Board: React.FC = () => {
   const [segments, setSegments] = useState<SegmentType[]>(DEFAULT_SONG);
   const [chords, setChords] = useState<ChordType[]>(DEFAULT_SONG_CHORDS);
   const [focusedRow, setFocusedRow] = useState<string | null>(null);
+  const lines = Array.from(new Set(segments.map((s) => s.lyricLine)));
+  const [isOver, setIsOver] = useState(false);
 
-  const lines = [...new Set(segments.map((segment) => segment.lyricLine))];
+  const addLine = (line: string) => {
+    const newLineNumber = (
+      Math.max(...segments.map((s) => parseInt(s.lyricLine))) + 1
+    ).toString();
+    const newSegment: SegmentType = {
+      id: Date.now().toString(),
+      segment: "New Segment",
+      lyricLine: newLineNumber,
+    };
+
+    const index = segments.findIndex((s) => s.lyricLine === line);
+    const updatedSegments = [
+      ...segments.slice(0, index + 1),
+      newSegment,
+      ...segments.slice(index + 1),
+    ];
+
+    setSegments(updatedSegments);
+    setFocusedRow(newLineNumber);
+  };
+
+  const handleLineDelete = (line: string) => {
+    const newSegments = segments.filter((s) => s.lyricLine !== line);
+    setSegments(newSegments);
+
+    if (newSegments.length > 0) {
+      setFocusedRow(newSegments[0].lyricLine);
+    } else {
+      setFocusedRow(null);
+    }
+  };
+  useEffect(() => {
+    setFocusedRow(lines[0]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full w-full gap-3 p-12 overflow-scroll">
@@ -160,18 +195,65 @@ const Board: React.FC = () => {
         Each segment can be assigned a chord.
       </p>
       {lines.map((line) => (
-        <Row
-          key={line}
-          line={line}
-          focused={focusedRow === line}
-          setFocus={setFocusedRow}
-          segments={segments}
-          setSegments={setSegments}
-          chords={chords}
-          setChords={setChords}
-          onFocusRow={() => setFocusedRow(line)}
-        />
+        <div key={line} className="relative mb-[1rem]" id={`line-${line}`}>
+          <Row
+            key={line}
+            line={line}
+            focused={focusedRow === line}
+            setFocus={setFocusedRow}
+            segments={segments}
+            setSegments={setSegments}
+            chords={chords}
+            setChords={setChords}
+            onFocusRow={() => setFocusedRow(line)}
+          />
+          {focusedRow === line && (
+            <div className="absolute bottom-[-2rem] right-7 ">
+              <button
+                className="btn btn-sm rounded-t-none rounded-r-none text-primary border-primary border-t-0 border-r-0 "
+                onClick={() => addLine(line)}
+              >
+                <FiEdit />
+                <span className="text-xs text-primary">New</span>
+              </button>
+              <button
+                className={`btn btn-sm rounded-t-none rounded-l-none border-primary border-t-0 ${
+                  isOver
+                    ? "text-error bg-error/50  ring-red-600 ring-inset ring-2"
+                    : "text-error"
+                }`}
+                onClick={() => {
+                  line.length === 1
+                    ? window.location.reload
+                    : handleLineDelete(line);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsOver(true);
+                }}
+                onDragLeave={() => setIsOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsOver(false);
+                  const segmentId = e.dataTransfer.getData("segmentId");
+                  // Remove the segment from the state
+                  setSegments((prev) => prev.filter((s) => s.id !== segmentId));
+                }}
+              >
+                <FiTrash />{" "}
+                <span
+                  className={`text-xs ${
+                    isOver ? "text-neutral-500 " : "text-error"
+                  }`}
+                >
+                  Del
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
       ))}
+
       <BurnBarrel setSegments={setSegments} setChords={setChords} />
     </div>
   );
@@ -206,13 +288,14 @@ const Row: React.FC<RowProps> = ({
 
     if (before !== segmentId) {
       let copy = [...segments];
-      let chordsCopy = [...chords];
-
       let segmentToTransfer = copy.find((s) => s.id === segmentId);
       if (!segmentToTransfer) return;
-      segmentToTransfer = { ...segmentToTransfer, lyricLine: line };
 
+      // Remove the segment from its original line
       copy = copy.filter((s) => s.id !== segmentId);
+
+      // Add the segment to the new line
+      segmentToTransfer = { ...segmentToTransfer, lyricLine: line };
 
       const moveToBack = before === "-1";
 
@@ -226,9 +309,25 @@ const Row: React.FC<RowProps> = ({
       }
 
       setSegments(copy);
+      setFocus(line);
     }
   };
 
+  /* const handleDeleteClick = () => {
+    const filteredSegments = segments.filter((s) => s.lyricLine === line);
+
+    if (filteredSegments.length > 0) {
+      // Delete the last segment in the line
+      const lastSegment = filteredSegments[filteredSegments.length - 1];
+      setSegments((prevSegments) =>
+        prevSegments.filter((s) => s.id !== lastSegment.id)
+      );
+    } else {
+      // If no segments are left, delete the line
+      handleLineDelete(line);
+    }
+  };
+   */
   const handleDragOver = (e: DragEvent) => {
     e.preventDefault();
     highlightIndicator(e);
@@ -321,6 +420,8 @@ const Row: React.FC<RowProps> = ({
             chords={chords}
             handleDragStart={handleDragStart}
             focused={focused}
+            setSegments={setSegments}
+            setChords={setChords}
           />
         ))}
         <DropIndicator beforeId={null} lyricLine={line} />
@@ -340,9 +441,42 @@ const Segment: React.FC<
     chords: ChordType[];
     focused: boolean;
     handleDragStart: (e: DragEvent, segment: SegmentType) => void;
+    setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
+    setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
   }
-> = ({ segment, id, chords, focused, lyricLine, chordId, handleDragStart }) => {
-  const chord = chords.find((c) => c.id === chordId)?.chord || ""; // Match chordId to find the chord.
+> = ({
+  segment,
+  id,
+  chords,
+  focused,
+  lyricLine,
+  chordId,
+  handleDragStart,
+  setSegments,
+  setChords,
+    
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [editedSegment, setEditedSegment] = useState(segment);
+  const [editedChord, setEditedChord] = useState(chordId);
+
+  const handleDoubleClick = () => {
+    setEditing(true);
+  };
+  const handleCancel = () => {
+    setEditing(false);
+  };
+
+  const handleSave = () => {
+    setSegments((prevSegments) =>
+      prevSegments.map((s) =>
+        s.id === id ? { ...s, segment: editedSegment, chordId: editedChord } : s
+      )
+    );
+    setEditing(false);
+  };
+
+  const chord = chords.find((c) => c.id === chordId)?.chord || "";
 
   return (
     <>
@@ -354,14 +488,54 @@ const Segment: React.FC<
         onDragStart={(e) =>
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
+        onDoubleClick={handleDoubleClick}
         className={`cursor-grab rounded p-3 active:cursor-grabbing ${
           focused ? "bg-neutral" : "bg-neutral/65"
         }`}
       >
-        <div className="h-full flex flex-col justify-between">
-          <p className="text-sm text-neutral-100">{chord}</p>
-          <p className="text-sm text-neutral-100">{segment}</p>
-        </div>
+        {editing ? (
+          <div className="flex flex-col gap-2">
+            <select
+              value={editedChord}
+              onChange={(e) => setEditedChord(e.target.value)}
+              className="select select-bordered w-full max-w-xs"
+            >
+              <option value="">No Chord</option>
+              {chords.map((chord) => (
+                <option key={chord.id} value={chord.id}>
+                  {chord.chord}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={editedSegment}
+              onChange={(e) => setEditedSegment(e.target.value)}
+              className="input input-bordered w-full max-w-xs "
+            />
+
+            <div className="w-100 flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="rounded border border-neutral-700  px-2  text-neutral-900 me-1"
+              >
+                <span className="text-xs ">Cancel</span>
+              </button>
+              <button
+                onClick={handleSave}
+                className="rounded bg-primary px-2 text-sm text-neutral-100"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex flex-col justify-between gap-2">
+            <p className="text-sm text-neutral-100">{chord}</p>
+            <p className="text-sm text-neutral-100">{segment}</p>
+          </div>
+        )}
       </motion.div>
     </>
   );
@@ -488,6 +662,18 @@ const AddSegment: React.FC<AddSegmentProps> = ({
       </div> */}
       <div className="flex flex-col justify-between gap-2">
         <div className="flex">
+          {/* <select
+            value={editedChord}
+            onChange={(e) => setEditedChord(e.target.value)}
+            className="w-full rounded bg-base-200 text-neutral outline-none"
+          >
+            <option value="">No Chord</option>
+            {chords.map((chord) => (
+              <option key={chord.id} value={chord.id}>
+                {chord.chord}
+              </option>
+            ))} 
+          </select>*/}
           <input
             id="chord"
             value={chord}
