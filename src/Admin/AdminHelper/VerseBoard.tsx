@@ -116,10 +116,12 @@ interface RowProps {
   focused: boolean;
   segments: SegmentType[];
   chords: ChordType[];
+  editModeSegmentId: string | null;
   setFocus: React.Dispatch<React.SetStateAction<string | null>>;
+  onFocusRow: () => void;
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
   setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
-  onFocusRow: () => void;
+  setEditModeSegmentId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 interface DropIndicatorProps {
@@ -135,8 +137,16 @@ interface BurnBarrelProps {
 interface AddSegmentProps {
   lyricLine: string;
   focused: boolean;
+  chords: ChordType[];
+  formOpen: boolean;
+  addFormChord: string;
+  addFormSegment: string;
+  onAddClick?: () => void;
   setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
   setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
+  setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setAddFormSegment: React.Dispatch<React.SetStateAction<string>>;
+  setAddFormChord: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const VerseBoard: React.FC = () => {
@@ -152,15 +162,19 @@ const Board: React.FC = () => {
   const [chords, setChords] = useState<ChordType[]>(DEFAULT_SONG_CHORDS);
   const [focusedRow, setFocusedRow] = useState<string | null>(null);
   const lines = Array.from(new Set(segments.map((s) => s.lyricLine)));
+  const [editModeSegmentId, setEditModeSegmentId] = useState<string | null>(
+    null
+  );
   const [isOver, setIsOver] = useState(false);
 
   const addLine = (line: string) => {
     const newLineNumber = (
       Math.max(...segments.map((s) => parseInt(s.lyricLine))) + 1
     ).toString();
+    const newSegmentId = Date.now().toString();
     const newSegment: SegmentType = {
-      id: Date.now().toString(),
-      segment: "New Segment",
+      id: newSegmentId,
+      segment: "New lyric...",
       lyricLine: newLineNumber,
     };
 
@@ -171,6 +185,7 @@ const Board: React.FC = () => {
       ...segments.slice(index + 1),
     ];
 
+    setEditModeSegmentId(newSegmentId);
     setSegments(updatedSegments);
     setFocusedRow(newLineNumber);
   };
@@ -184,6 +199,7 @@ const Board: React.FC = () => {
     } else {
       setFocusedRow(null);
     }
+    setEditModeSegmentId(null);
   };
   useEffect(() => {
     setFocusedRow(lines[0]);
@@ -195,7 +211,14 @@ const Board: React.FC = () => {
         Each segment can be assigned a chord.
       </p>
       {lines.map((line) => (
-        <div key={line} className="relative mb-[1rem]" id={`line-${line}`}>
+        <div
+          key={line}
+          className="relative mb-[1rem]"
+          id={`line-${line}`}
+          onClick={() => {
+            if (focusedRow !== line) setFocusedRow(line);
+          }}
+        >
           <Row
             key={line}
             line={line}
@@ -206,6 +229,8 @@ const Board: React.FC = () => {
             chords={chords}
             setChords={setChords}
             onFocusRow={() => setFocusedRow(line)}
+            editModeSegmentId={editModeSegmentId}
+            setEditModeSegmentId={setEditModeSegmentId}
           />
           {focusedRow === line && (
             <div className="absolute bottom-[-2rem] right-7 ">
@@ -213,7 +238,7 @@ const Board: React.FC = () => {
                 className="btn btn-sm rounded-t-none rounded-r-none text-primary border-primary border-t-0 border-r-0 "
                 onClick={() => addLine(line)}
               >
-                <FiEdit />
+                <FiPlus />
                 <span className="text-xs text-primary">New</span>
               </button>
               <button
@@ -268,13 +293,78 @@ const Row: React.FC<RowProps> = ({
   chords,
   setSegments,
   setChords,
+  editModeSegmentId,
+  setEditModeSegmentId,
 }) => {
   const [active, setActive] = useState(false);
+  const [editSegment, setEditSegment] = useState<SegmentType | null>(null);
+  const [editedSegment, setEditedSegment] = useState<SegmentType | null>(null);
+  const [editedChord, setEditedChord] = useState<ChordType | null>(null);
+  const [addFormOpen, setAddFormOpen] = useState(false);
+  const [addFormChord, setAddFormChord] = useState("");
+  const [addFormSegment, setAddFormSegment] = useState("");
+
+  useEffect(() => {
+    if (!focused) {
+      if (editSegment) {
+        handleSave();
+      }
+      if (addFormOpen) {
+        if (addFormSegment && addFormSegment.trim() !== "") {
+          handleAddFormSave();
+        } else {
+          setAddFormOpen(false);
+        }
+      }
+    }
+  }, [focused]);
+
+  useEffect(() => {
+    if (editModeSegmentId) {
+      const segmentToEdit = segments.find((s) => s.id === editModeSegmentId);
+      if (segmentToEdit) {
+        setEditSegment(segmentToEdit);
+        setEditedSegment(segmentToEdit);
+        const curentChord = chords.find((c) => c.id === segmentToEdit.chordId);
+        setEditedChord(curentChord || { id: "", chord: "" });
+      }
+    }
+  }, [editModeSegmentId, segments, chords]);
+
+  const handleAddFormSave = () => {
+    if (!addFormSegment || addFormSegment.trim() === "") {
+      setAddFormOpen(false);
+      return;
+    }
+
+    setChords((prev) => {
+      const newChord: ChordType = {
+        id: Date.now().toString(),
+        chord: addFormChord,
+      };
+
+      setSegments((prev) => {
+        const newSegment: SegmentType = {
+          id: Date.now().toString(),
+          segment: addFormSegment,
+          lyricLine: line,
+          chordId: addFormChord ? newChord.id : undefined,
+        };
+
+        return [...prev, newSegment];
+      });
+
+      return addFormChord ? [...prev, newChord] : prev;
+    });
+
+    setAddFormSegment("");
+    setAddFormChord("");
+    setAddFormOpen(false);
+  };
 
   const handleDragStart = (e: DragEvent, segment: SegmentType) => {
     e.dataTransfer.setData("segmentId", segment.id);
   };
-
   const handleDragEnd = (e: DragEvent) => {
     const segmentId = e.dataTransfer.getData("segmentId");
 
@@ -313,21 +403,6 @@ const Row: React.FC<RowProps> = ({
     }
   };
 
-  /* const handleDeleteClick = () => {
-    const filteredSegments = segments.filter((s) => s.lyricLine === line);
-
-    if (filteredSegments.length > 0) {
-      // Delete the last segment in the line
-      const lastSegment = filteredSegments[filteredSegments.length - 1];
-      setSegments((prevSegments) =>
-        prevSegments.filter((s) => s.id !== lastSegment.id)
-      );
-    } else {
-      // If no segments are left, delete the line
-      handleLineDelete(line);
-    }
-  };
-   */
   const handleDragOver = (e: DragEvent) => {
     e.preventDefault();
     highlightIndicator(e);
@@ -388,6 +463,39 @@ const Row: React.FC<RowProps> = ({
     setActive(false);
   };
 
+  const handleDoubleClick = (seg: SegmentType) => {
+    if (editSegment && editedSegment) {
+      handleSave();
+    }
+
+    if (addFormOpen) {
+      setAddFormOpen(false);
+    }
+
+    setEditSegment(seg);
+    setEditedSegment(seg);
+    const curentChord = chords.find((c) => c.id === seg.chordId);
+    setEditedChord(curentChord || { id: "", chord: "" });
+  };
+
+  const handleSave = () => {
+    if (editSegment && editedSegment) {
+      setSegments((prevSegments) =>
+        prevSegments.map((s) =>
+          s.id === editSegment.id
+            ? {
+                ...s,
+                segment: editedSegment.segment,
+                chordId: editedChord?.id,
+              }
+            : s
+        )
+      );
+    }
+    setEditSegment(null);
+    setEditModeSegmentId(null);
+  };
+
   const filteredSegments = segments.filter((s) => s.lyricLine === line);
   return (
     <div
@@ -414,22 +522,43 @@ const Row: React.FC<RowProps> = ({
         }`}
       >
         {filteredSegments.map((s) => (
-          <Segment
+          <div
             key={s.id}
-            {...s}
-            chords={chords}
-            handleDragStart={handleDragStart}
-            focused={focused}
-            setSegments={setSegments}
-            setChords={setChords}
-          />
+            className="h-full flex items-center gap-2"
+            onDoubleClick={() => handleDoubleClick(s)}
+          >
+            <Segment
+              {...s}
+              chords={chords}
+              handleDragStart={handleDragStart}
+              focused={focused}
+              setSegments={setSegments}
+              setChords={setChords}
+              editedSegment={editedSegment}
+              handleSave={handleSave}
+              editing={editSegment?.id === s.id}
+              setEditSegment={setEditSegment}
+              setEditedSegment={setEditedSegment}
+              editedChord={editedChord}
+              setEditedChord={setEditedChord}
+              handleCancel={() => setEditSegment(null)}
+            />
+          </div>
         ))}
         <DropIndicator beforeId={null} lyricLine={line} />
         <AddSegment
+          chords={chords}
           lyricLine={line}
           setSegments={setSegments}
           setChords={setChords}
           focused={focused}
+          onAddClick={editSegment ? handleSave : undefined}
+          formOpen={addFormOpen}
+          setFormOpen={setAddFormOpen}
+          setAddFormSegment={setAddFormSegment}
+          setAddFormChord={setAddFormChord}
+          addFormSegment={addFormSegment}
+          addFormChord={addFormChord}
         />
       </div>
     </div>
@@ -440,9 +569,17 @@ const Segment: React.FC<
   SegmentType & {
     chords: ChordType[];
     focused: boolean;
+    editing: boolean;
+    editedSegment: SegmentType | null;
+    editedChord: ChordType | null;
+    handleSave: () => void;
+    handleCancel: () => void;
     handleDragStart: (e: DragEvent, segment: SegmentType) => void;
     setSegments: React.Dispatch<React.SetStateAction<SegmentType[]>>;
     setChords: React.Dispatch<React.SetStateAction<ChordType[]>>;
+    setEditedSegment: React.Dispatch<React.SetStateAction<SegmentType | null>>;
+    setEditSegment: React.Dispatch<React.SetStateAction<SegmentType | null>>;
+    setEditedChord: React.Dispatch<React.SetStateAction<ChordType | null>>;
   }
 > = ({
   segment,
@@ -451,32 +588,35 @@ const Segment: React.FC<
   focused,
   lyricLine,
   chordId,
+  editedChord,
   handleDragStart,
-  setSegments,
-  setChords,
-    
+  editedSegment,
+  setEditedSegment,
+  setEditedChord,
+  editing,
+  handleSave,
+  handleCancel,
 }) => {
-  const [editing, setEditing] = useState(false);
-  const [editedSegment, setEditedSegment] = useState(segment);
-  const [editedChord, setEditedChord] = useState(chordId);
-
-  const handleDoubleClick = () => {
-    setEditing(true);
-  };
-  const handleCancel = () => {
-    setEditing(false);
-  };
-
-  const handleSave = () => {
-    setSegments((prevSegments) =>
-      prevSegments.map((s) =>
-        s.id === id ? { ...s, segment: editedSegment, chordId: editedChord } : s
-      )
-    );
-    setEditing(false);
-  };
-
   const chord = chords.find((c) => c.id === chordId)?.chord || "";
+
+  const handleSegmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedSegment((prev) => {
+      if (prev) {
+        return { ...prev, segment: e.target.value };
+      }
+      return null;
+    });
+  };
+
+  const handleChordChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedChordId = e.target.value;
+    setEditedChord((prev) => {
+      if (prev) {
+        return { ...prev, id: selectedChordId };
+      }
+      return null;
+    });
+  };
 
   return (
     <>
@@ -488,47 +628,58 @@ const Segment: React.FC<
         onDragStart={(e) =>
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
-        onDoubleClick={handleDoubleClick}
         className={`cursor-grab rounded p-3 active:cursor-grabbing ${
           focused ? "bg-neutral" : "bg-neutral/65"
         }`}
       >
         {editing ? (
-          <div className="flex flex-col gap-2">
-            <select
-              value={editedChord}
-              onChange={(e) => setEditedChord(e.target.value)}
-              className="select select-bordered w-full max-w-xs"
+          <div className="flex relative">
+            <div className="flex flex-col gap-2 me-1">
+              <select
+                value={editedChord?.id || ""}
+                onChange={handleChordChange}
+                className="select min-h-[1.2rem] h-[1.5rem] rounded-sm max-w-[15rem] bg-base-100"
+              >
+                <option value="">No Chord</option>
+                {chords.map((chord) => (
+                  <option key={chord.id} value={chord.id}>
+                    {chord.chord}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={
+                  editedSegment?.segment != null ? editedSegment.segment : ""
+                }
+                onChange={handleSegmentChange}
+                className="input h-[1.5rem] rounded-sm bg-base-100 max-w-[15rem]"
+              />
+            </div>
+            <button
+              className="btn btn-ghost btn-xs absolute -top-3 -right-3 rounded-full"
+              onClick={handleCancel}
             >
-              <option value="">No Chord</option>
-              {chords.map((chord) => (
-                <option key={chord.id} value={chord.id}>
-                  {chord.chord}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={editedSegment}
-              onChange={(e) => setEditedSegment(e.target.value)}
-              className="input input-bordered w-full max-w-xs "
-            />
+              <span className="text-xs text-error ">&times;</span>
+            </button>
 
-            <div className="w-100 flex gap-2 justify-end">
+            <div className="flex flex-col gap-2 mr-2 me-2">
+              <button
+                onClick={handleSave}
+                className="btn h-[3rem] w-[3rem] min-h-[1.5rem] bg-primary/50 border-none text-base-100 self-center rounded-full"
+              >
+                <FiEdit />
+              </button>
+            </div>
+            {/* <div className="w-100 flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded border border-neutral-700  px-2  text-neutral-900 me-1"
+                className="btn min-h-[1rem] h-[1.2rem] rounded-sm me-1"
               >
                 <span className="text-xs ">Cancel</span>
               </button>
-              <button
-                onClick={handleSave}
-                className="rounded bg-primary px-2 text-sm text-neutral-100"
-              >
-                Save
-              </button>
-            </div>
+            </div> */}
           </div>
         ) : (
           <div className="h-full flex flex-col justify-between gap-2">
@@ -549,7 +700,7 @@ const DropIndicator: React.FC<DropIndicatorProps> = ({
     <div
       data-before={beforeId || "-1"}
       data-lyric-line={lyricLine}
-      className="my-1 w-0.5 h-10 bg-violet-400 opacity-0"
+      className="my-1 w-0.5 h-20 bg-violet-400 opacity-0"
     />
   );
 };
@@ -592,122 +743,161 @@ const BurnBarrel: React.FC<BurnBarrelProps> = ({ setSegments }) => {
 };
 
 const AddSegment: React.FC<AddSegmentProps> = ({
+  chords,
   lyricLine,
   setSegments,
   setChords,
   focused,
+  onAddClick,
+  formOpen,
+  setFormOpen,
+  addFormSegment,
+  setAddFormSegment,
+  addFormChord,
+  setAddFormChord,
 }) => {
-  const [form, setForm] = useState(false);
-  const [segment, setSegment] = useState("");
-  const [chord, setChord] = useState("");
+  useEffect(() => {
+    if (formOpen === false && addFormSegment && addFormSegment.trim() !== "") {
+      handleSubmit();
+    }
+  }, [formOpen]);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!segment) return;
-    /*  if (!chord) return; */
-
-    setChords((pv: ChordType[]) => {
-      const newChord: ChordType = {
-        id: Date.now().toString(),
-        chord,
-      };
-      setSegments((pv) => {
-        const newSegment: SegmentType = {
-          id: Date.now().toString(),
-          segment,
-          lyricLine,
-          chordId: newChord.id,
-        };
-
-        return [...pv, newSegment];
-      });
-
-      return [...pv, newChord];
-    });
-
-    setSegment("");
-    setChord("");
-    setForm(false);
+  const handleAddClick = () => {
+    if (onAddClick) onAddClick();
+    setFormOpen(true);
   };
 
-  if (!form) {
-    return (
-      <button
-        onClick={() => setForm(true)}
-        className={`flex items-center gap-2 rounded border border-dashed  px-2 py-1.5 text-sm  ${
-          focused
-            ? "text-neutral border-neutral-700 bg-neutral-800/10"
-            : "text-neutral/50 border-neutral-300 bg-neutral-800/5"
-        }`}
-      >
-        <FiPlus /> Add a segment
-      </button>
-    );
-  }
+  const handleSubmit = (e?: FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
+    if (!addFormSegment || addFormSegment.trim() === "") {
+      setFormOpen(false);
+      return;
+    }
+
+    setChords((pv: ChordType[]) => {
+      if (addFormChord && addFormChord !== "") {
+        const newChord: ChordType = {
+          id: Date.now().toString(),
+          chord: chords.find((c) => c.id === addFormChord)?.chord || "",
+        };
+
+        setSegments((pv) => {
+          const newSegment: SegmentType = {
+            id: Date.now().toString(),
+            segment: addFormSegment.trim(),
+            lyricLine,
+            chordId: newChord.id,
+          };
+
+          return [...pv, newSegment];
+        });
+
+        return [...pv, newChord];
+      } else {
+        // No chord selected, just create the segment
+        setSegments((pv) => {
+          const newSegment: SegmentType = {
+            id: Date.now().toString(),
+            segment: addFormSegment.trim(),
+            lyricLine,
+          };
+
+          return [...pv, newSegment];
+        });
+
+        return pv;
+      }
+    });
+
+    setAddFormSegment("");
+    setAddFormChord("");
+    setTimeout(() => {
+      setFormOpen(true);
+    }, 10);
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`flex items-center gap-2 rounded p-3 ${
-        focused ? " bg-neutral" : "  bg-neutral-800/10"
-      }`}
-    >
-      {/*  <div className="h-full flex flex-col justify-between ">
-        <label htmlFor="chord" className="text-xs text-neutral">
-          chord
-        </label>
-        <label htmlFor="segment" className="text-xs text-neutral">
-          Segment
-        </label>
-      </div> */}
-      <div className="flex flex-col justify-between gap-2">
-        <div className="flex">
-          {/* <select
-            value={editedChord}
-            onChange={(e) => setEditedChord(e.target.value)}
-            className="w-full rounded bg-base-200 text-neutral outline-none"
+    <>
+      {!formOpen ? (
+        <button
+          onClick={handleAddClick}
+          className={`flex items-center gap-2 rounded border border-dashed px-2 py-1.5 text-sm ${
+            focused
+              ? "text-neutral border-neutral-700 bg-neutral-800/10"
+              : "text-neutral/50 border-neutral-300 bg-neutral-800/5"
+          }`}
+        >
+          <FiPlus /> Add a segment
+        </button>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          layout
+          layoutId={""}
+          draggable="false"
+          className={`cursor-grab rounded p-3 active:cursor-grabbing ${
+            focused ? "bg-neutral" : "bg-neutral/65"
+          }`}
+        >
+          <form
+            onSubmit={handleSubmit}
+            className={`flex items-center gap-2 rounded ${
+              focused ? " bg-neutral" : "  bg-neutral-800/10"
+            }`}
           >
-            <option value="">No Chord</option>
-            {chords.map((chord) => (
-              <option key={chord.id} value={chord.id}>
-                {chord.chord}
-              </option>
-            ))} 
-          </select>*/}
-          <input
-            id="chord"
-            value={chord}
-            onChange={(e) => setChord(e.target.value)}
-            type="text"
-            autoComplete="off"
-            placeholder="chord here..."
-            className="rounded bg-base-200 text-neutral outline-none mr-2 placeholder:text-xs border border-neutral-700"
-          />
-          <button
-            type="button"
-            onClick={() => setForm(false)}
-            className="rounded border border-neutral-700  px-2  text-neutral-900 me-1"
-          >
-            <span className="text-xs ">Cancel</span>
-          </button>
-          <button
-            type="submit"
-            className="rounded bg-primary px-2 text-sm text-neutral-100"
-          >
-            Save
-          </button>
-        </div>
+            <div className="flex relative">
+              <div className="flex flex-col justify-between gap-2 me-2">
+                <div className="flex">
+                  <select
+                    value={addFormChord}
+                    onChange={(e) => setAddFormChord(e.target.value)}
+                    className="select min-h-[1.2rem] h-[1.5rem] rounded-sm max-w-[15rem] bg-base-100"
+                  >
+                    <option value="">No Chord</option>
+                    {chords.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.chord}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-        <input
-          id="segment"
-          value={segment}
-          onChange={(e) => setSegment(e.target.value)}
-          type="text"
-          placeholder="lyric segment here..."
-          autoComplete="off"
-          className="rounded bg-base-200 text-neutral outline-none placeholder:text-xs border border-neutral-700"
-        />
-      </div>
-    </form>
+                <input
+                  id="segment"
+                  value={addFormSegment}
+                  onChange={(e) => setAddFormSegment(e.target.value)}
+                  type="text"
+                  placeholder="lyric segment here..."
+                  autoComplete="off"
+                  autoFocus
+                  className="input h-[1.5rem] rounded-sm bg-base-100 max-w-[15rem] placeholder:text-xs border"
+                />
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs absolute -top-3 -right-3 rounded-full"
+                onClick={() => setFormOpen(false)}
+              >
+                <span className="text-xs text-error ">&times;</span>
+              </button>
+
+              <div className="flex flex-col gap-2 mr-2 me-2">
+                <button
+                  type="submit"
+                  className="btn h-[3rem] w-[3rem] min-h-[1.5rem] bg-primary/50 border-none text-base-100 self-center rounded-full"
+                >
+                  <FiPlus />
+                </button>
+              </div>
+            </div>
+          </form>
+        </motion.div>
+      )}
+    </>
   );
 };
