@@ -2,6 +2,7 @@ import React, { useState, DragEvent, FormEvent, useEffect } from "react";
 import { FiEdit, FiPlus, FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
+import { line } from "framer-motion/client";
 
 interface SegmentType {
   id: string;
@@ -161,49 +162,128 @@ const Board: React.FC = () => {
   const [segments, setSegments] = useState<SegmentType[]>(DEFAULT_SONG);
   const [chords, setChords] = useState<ChordType[]>(DEFAULT_SONG_CHORDS);
   const [focusedRow, setFocusedRow] = useState<string | null>(null);
-  const lines = Array.from(new Set(segments.map((s) => s.lyricLine)));
+  const [trackLines, setTrackLines] = useState<string[]>([]);
+  const segmentLines = Array.from(new Set(segments.map((s) => s.lyricLine)));
+  const lines = Array.from(new Set([...segmentLines, ...trackLines])).sort(
+    (a, b) => parseInt(a) - parseInt(b)
+  );
   const [editModeSegmentId, setEditModeSegmentId] = useState<string | null>(
     null
   );
   const [isOver, setIsOver] = useState(false);
 
+  useEffect(() => {
+    setTrackLines(Array.from(new Set(segments.map((s) => s.lyricLine))));
+  }, []);
+
+  useEffect(() => {
+    const linesWithSegments = Array.from(
+      new Set(segments.map((s) => s.lyricLine))
+    );
+    const emptyLines = trackLines.filter(
+      (line) => !linesWithSegments.includes(line)
+    );
+    if (emptyLines.length > 0) {
+      const newTrackLines = trackLines.filter(
+        (line) => !emptyLines.includes(line)
+      );
+      if (newTrackLines.length !== trackLines.length) {
+        const currentFocusedLine = focusedRow;
+        const { updatedSegments, updatedTrackLines, lineMap } = renumberLines(
+          segments,
+          newTrackLines
+        );
+        setSegments(updatedSegments);
+        setTrackLines(updatedTrackLines);
+        if (currentFocusedLine) {
+          if (emptyLines.includes(focusedRow)) {
+            if (updatedTrackLines.length > 0) {
+              setFocusedRow(updatedTrackLines[0]);
+            } else {
+              setFocusedRow(null);
+            }
+          } else {
+            setFocusedRow(lineMap[currentFocusedLine] || currentFocusedLine);
+          }
+        }
+      }
+    }
+  }, [segments]);
+
+  const renumberLines = (segments: SegmentType[], trackLines: string[]) => {
+    const lineOrder = [...trackLines].sort((a, b) => parseInt(a) - parseInt(b));
+    const newLineMap = Object.fromEntries(
+      lineOrder.map((line, index) => [line, (index + 1).toString()])
+    );
+    const updatedSegments = segments.map((segment) => ({
+      ...segment,
+      lyricLine: newLineMap[segment.lyricLine] || segment.lyricLine,
+    }));
+    const updatedTrackLines = trackLines.map(
+      (line) => newLineMap[line] || line
+    );
+
+    return { updatedSegments, updatedTrackLines, lineMap: newLineMap };
+  };
+
   const addLine = (line: string) => {
-    const newLineNumber = (
-      Math.max(...segments.map((s) => parseInt(s.lyricLine))) + 1
-    ).toString();
+    const lineIndex = lines.indexOf(line);
+    const tempLineId = `temp_${Date.now()}`;
+
     const newSegmentId = Date.now().toString();
     const newSegment: SegmentType = {
       id: newSegmentId,
       segment: "New lyric...",
-      lyricLine: newLineNumber,
+      lyricLine: tempLineId,
     };
 
-    const index = segments.findIndex((s) => s.lyricLine === line);
-    const updatedSegments = [
-      ...segments.slice(0, index + 1),
-      newSegment,
-      ...segments.slice(index + 1),
-    ];
+    const newTrackLines = [...trackLines];
+    newTrackLines.splice(lineIndex + 1, 0, tempLineId);
+    setTrackLines(newTrackLines);
 
-    setEditModeSegmentId(newSegmentId);
+    setSegments((prev) => [...prev, newSegment]);
+
+    const { updatedSegments, updatedTrackLines } = renumberLines(
+      [...segments, newSegment],
+      newTrackLines
+    );
+
     setSegments(updatedSegments);
+    setTrackLines(updatedTrackLines);
+    const newLineNumber = updatedTrackLines[lineIndex + 1];
+    setEditModeSegmentId(newSegmentId);
     setFocusedRow(newLineNumber);
   };
 
   const handleLineDelete = (line: string) => {
+    const lineIndex = lines.indexOf(line);
     const newSegments = segments.filter((s) => s.lyricLine !== line);
-    setSegments(newSegments);
 
-    if (newSegments.length > 0) {
-      setFocusedRow(newSegments[0].lyricLine);
+    const newTrackLines = trackLines.filter((l) => l !== line);
+    const { updatedSegments, updatedTrackLines } = renumberLines(
+      newSegments,
+      newTrackLines
+    );
+
+    setSegments(updatedSegments);
+    setTrackLines(updatedTrackLines);
+
+    if (updatedTrackLines.length > 0) {
+      const nextIndex = Math.min(lineIndex, updatedTrackLines.length - 1);
+      setFocusedRow(updatedTrackLines[nextIndex]);
     } else {
       setFocusedRow(null);
     }
     setEditModeSegmentId(null);
   };
+
   useEffect(() => {
     setFocusedRow(lines[0]);
   }, []);
+
+  const handleSegmentRemoval = (segmentId: string) => {
+    setSegments((prev) => prev.filter((s) => s.id !== segmentId));
+  };
 
   return (
     <div className="flex flex-col h-full w-full gap-3 p-12 overflow-scroll">
@@ -261,8 +341,7 @@ const Board: React.FC = () => {
                   e.preventDefault();
                   setIsOver(false);
                   const segmentId = e.dataTransfer.getData("segmentId");
-                  // Remove the segment from the state
-                  setSegments((prev) => prev.filter((s) => s.id !== segmentId));
+                  handleSegmentRemoval(segmentId);
                 }}
               >
                 <FiTrash />{" "}
