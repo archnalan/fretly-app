@@ -2,7 +2,6 @@ import React, { useState, DragEvent, FormEvent, useEffect } from "react";
 import { FiEdit, FiPlus, FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
-import { line } from "framer-motion/client";
 
 interface SegmentType {
   id: string;
@@ -255,6 +254,12 @@ const Board: React.FC = () => {
     setFocusedRow(newLineNumber);
   };
 
+  const handleVerseSave = () => {
+    //renumber the segments and lines before saving
+    // const { updatedSegments } = renumberLines(segments, trackLines);
+    // console.log(updatedSegments);
+  };
+
   const handleLineDelete = (line: string) => {
     const lineIndex = lines.indexOf(line);
     const newSegments = segments.filter((s) => s.lyricLine !== line);
@@ -293,7 +298,7 @@ const Board: React.FC = () => {
       {lines.map((line) => (
         <div
           key={line}
-          className="relative mb-[1rem]"
+          className="relative mb-[2rem]"
           id={`line-${line}`}
           onClick={() => {
             if (focusedRow !== line) setFocusedRow(line);
@@ -315,22 +320,22 @@ const Board: React.FC = () => {
           {focusedRow === line && (
             <div className="absolute bottom-[-2rem] right-7 ">
               <button
-                className="btn btn-sm rounded-t-none rounded-r-none text-primary border-primary border-t-0 border-r-0 "
+                className="btn btn-sm rounded-t-none rounded-r-none text-primary border-primary border-t-neutral/10 border-r-0 "
                 onClick={() => addLine(line)}
               >
                 <FiPlus />
-                <span className="text-xs text-primary">New</span>
+                <span className="text-xs text-primary">New Line</span>
               </button>
               <button
-                className={`btn btn-sm rounded-t-none rounded-l-none border-primary border-t-0 ${
+                className={`btn btn-sm rounded-t-none rounded-l-none border-primary border-t-neutral/10 ${
                   isOver
                     ? "text-error bg-error/50  ring-red-600 ring-inset ring-2"
                     : "text-error"
                 }`}
                 onClick={() => {
-                  line.length === 1
-                    ? window.location.reload
-                    : handleLineDelete(line);
+                  if (lines.length > 1) {
+                    document.getElementById(`my_modal_${line}`)?.showModal();
+                  }
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -341,7 +346,9 @@ const Board: React.FC = () => {
                   e.preventDefault();
                   setIsOver(false);
                   const segmentId = e.dataTransfer.getData("segmentId");
-                  handleSegmentRemoval(segmentId);
+                  if (!(lines.length === 1 && segments.length === 1)) {
+                    handleSegmentRemoval(segmentId);
+                  }
                 }}
               >
                 <FiTrash />{" "}
@@ -350,13 +357,38 @@ const Board: React.FC = () => {
                     isOver ? "text-neutral-500 " : "text-error"
                   }`}
                 >
-                  Del
+                  Remove
                 </span>
               </button>
+              <dialog id={`my_modal_${line}`} className="modal">
+                <div className="modal-box">
+                  <h3 className="font-bold text-lg">Delete Line</h3>
+                  <div className="pt-4">
+                    <p>Are you sure you want to delete this line?</p>
+                    <p>Segments in this line will be deleted.</p>
+                  </div>
+                  <form method="dialog" className="modal-action">
+                    <button className="btn btn-sm btn-circle btn-ghost text-error border-none absolute right-2 top-2">
+                      ✕
+                    </button>
+                    <button
+                      className=" btn btn-error"
+                      onClick={() => handleLineDelete(line)}
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </dialog>
             </div>
           )}
         </div>
       ))}
+      <div>
+        <button className="btn btn-primary" onClick={handleVerseSave}>
+          Save
+        </button>
+      </div>
 
       <BurnBarrel setSegments={setSegments} setChords={setChords} />
     </div>
@@ -580,7 +612,9 @@ const Row: React.FC<RowProps> = ({
     <div
       tabIndex={0}
       className={`w-full relative p-[2.5rem_2rem_1rem] flex gap-3 flex-wrap  ${
-        focused ? "ring-1 rounded-2xl ring-primary" : ""
+        focused
+          ? "ring-1 rounded-2xl ring-primary"
+          : "ring-1 rounded-2xl ring-neutral/20"
       }`}
       onFocus={onFocusRow}
     >
@@ -707,17 +741,17 @@ const Segment: React.FC<
         onDragStart={(e) =>
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
-        className={`cursor-grab rounded p-3 active:cursor-grabbing ${
+        className={`h-[5rem] flex items-center cursor-grab rounded p-2 active:cursor-grabbing ${
           focused ? "bg-neutral" : "bg-neutral/65"
         }`}
       >
         {editing ? (
-          <div className="flex relative">
+          <form onSubmit={handleSave} className="flex relative">
             <div className="flex flex-col gap-2 me-1">
               <select
                 value={editedChord?.id || ""}
                 onChange={handleChordChange}
-                className="select min-h-[1.2rem] h-[1.5rem] rounded-sm max-w-[15rem] bg-base-100"
+                className="select min-h-[1.2rem] h-[1.5rem] rounded-sm max-w-[12rem] bg-base-100/75"
               >
                 <option value="">No Chord</option>
                 {chords.map((chord) => (
@@ -728,15 +762,20 @@ const Segment: React.FC<
               </select>
               <input
                 type="text"
+                autoFocus
+                draggable="false"
                 value={
                   editedSegment?.segment != null ? editedSegment.segment : ""
                 }
-                onChange={handleSegmentChange}
-                className="input h-[1.5rem] rounded-sm bg-base-100 max-w-[15rem]"
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleSegmentChange(e);
+                }}
+                className="input h-[1.5rem] rounded-sm bg-base-100/75 max-w-[12rem]"
               />
             </div>
             <button
-              className="btn btn-ghost btn-xs absolute -top-3 -right-3 rounded-full"
+              className="btn btn-ghost btn-xs absolute -top-3 -right-2 rounded-full"
               onClick={handleCancel}
             >
               <span className="text-xs text-error ">&times;</span>
@@ -744,26 +783,21 @@ const Segment: React.FC<
 
             <div className="flex flex-col gap-2 mr-2 me-2">
               <button
-                onClick={handleSave}
+                type="submit"
                 className="btn h-[3rem] w-[3rem] min-h-[1.5rem] bg-primary/50 border-none text-base-100 self-center rounded-full"
               >
                 <FiEdit />
               </button>
             </div>
-            {/* <div className="w-100 flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="btn min-h-[1rem] h-[1.2rem] rounded-sm me-1"
-              >
-                <span className="text-xs ">Cancel</span>
-              </button>
-            </div> */}
-          </div>
+          </form>
         ) : (
-          <div className="h-full flex flex-col justify-between gap-2">
-            <p className="text-sm text-neutral-100">{chord}</p>
-            <p className="text-sm text-neutral-100">{segment}</p>
+          <div className="h-full flex flex-col justify-between">
+            <div className="h-1.5rem">
+              <p className="text-sm text-neutral-100">{chord}</p>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-neutral-100">{segment}</p>
+            </div>
           </div>
         )}
       </motion.div>
@@ -900,66 +934,57 @@ const AddSegment: React.FC<AddSegmentProps> = ({
 
   return (
     <>
-      {!formOpen ? (
-        <button
-          onClick={handleAddClick}
-          className={`flex items-center gap-2 rounded border border-dashed px-2 py-1.5 text-sm ${
-            focused
-              ? "text-neutral border-neutral-700 bg-neutral-800/10"
-              : "text-neutral/50 border-neutral-300 bg-neutral-800/5"
-          }`}
-        >
-          <FiPlus /> Add a segment
-        </button>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          layout
-          layoutId={""}
-          draggable="false"
-          className={`cursor-grab rounded p-3 active:cursor-grabbing ${
-            focused ? "bg-neutral" : "bg-neutral/65"
-          }`}
-        >
-          <form
-            onSubmit={handleSubmit}
-            className={`flex items-center gap-2 rounded ${
-              focused ? " bg-neutral" : "  bg-neutral-800/10"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ delay: 0.1 }}
+        layout
+        layoutId={""}
+        className="h-[5rem] flex self-center cursor-grab rounded"
+      >
+        {!formOpen ? (
+          <button
+            onClick={handleAddClick}
+            className={`h-full flex items-center gap-2 p-2 rounded border border-dashed text-sm ${
+              focused
+                ? "text-neutral border-neutral-700 bg-neutral-800/10"
+                : "text-neutral/50 border-neutral-300 bg-neutral-800/5"
             }`}
           >
-            <div className="flex relative">
-              <div className="flex flex-col justify-between gap-2 me-2">
-                <div className="flex">
-                  <select
-                    value={addFormChord}
-                    onChange={(e) => setAddFormChord(e.target.value)}
-                    className="select min-h-[1.2rem] h-[1.5rem] rounded-sm max-w-[15rem] bg-base-100"
-                  >
-                    <option value="">No Chord</option>
-                    {chords.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.chord}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
+            <FiPlus /> Add a segment
+          </button>
+        ) : (
+          <div
+            className={`h-full rounded flex items-center p-2 ${
+              focused ? "bg-neutral" : "bg-neutral/65"
+            }`}
+          >
+            <form onSubmit={handleSubmit} className="flex relative">
+              <div className="flex flex-col gap-2 me-1">
+                <select
+                  value={addFormChord}
+                  onChange={(e) => setAddFormChord(e.target.value)}
+                  className="select min-h-[1.2rem] h-[1.5rem] rounded-sm max-w-[12rem] bg-base-100/75"
+                >
+                  <option value="">No Chord</option>
+                  {chords.map((chord) => (
+                    <option key={chord.id} value={chord.id}>
+                      {chord.chord}
+                    </option>
+                  ))}
+                </select>
                 <input
-                  id="segment"
+                  type="text"
+                  autoFocus
+                  draggable="false"
                   value={addFormSegment}
                   onChange={(e) => setAddFormSegment(e.target.value)}
-                  type="text"
-                  placeholder="lyric segment here..."
-                  autoComplete="off"
-                  autoFocus
-                  className="input h-[1.5rem] rounded-sm bg-base-100 max-w-[15rem] placeholder:text-xs border"
+                  className="input input-ghost h-[1.5rem] bg-base-100/75 rounded-sm max-w-[12rem]"
                 />
               </div>
               <button
-                type="button"
-                className="btn btn-ghost btn-xs absolute -top-3 -right-3 rounded-full"
+                className="btn btn-ghost btn-xs absolute -top-3 -right-2 rounded-full"
                 onClick={() => setFormOpen(false)}
               >
                 <span className="text-xs text-error ">&times;</span>
@@ -970,13 +995,13 @@ const AddSegment: React.FC<AddSegmentProps> = ({
                   type="submit"
                   className="btn h-[3rem] w-[3rem] min-h-[1.5rem] bg-primary/50 border-none text-base-100 self-center rounded-full"
                 >
-                  <FiPlus />
+                  <FiEdit />
                 </button>
               </div>
-            </div>
-          </form>
-        </motion.div>
-      )}
+            </form>
+          </div>
+        )}
+      </motion.div>
     </>
   );
 };
