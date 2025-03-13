@@ -711,6 +711,13 @@ const Segment: React.FC<
   handleCancel,
 }) => {
   const chord = chords.find((c) => c.id === chordId)?.chord || "";
+  const textInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing && textInputRef.current) {
+      textInputRef.current.select();
+    }
+  }, [editing]);
 
   const handleSegmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditedSegment((prev) => {
@@ -762,6 +769,7 @@ const Segment: React.FC<
               </select>
               <input
                 type="text"
+                ref={textInputRef}
                 autoFocus
                 draggable="false"
                 value={
@@ -775,6 +783,7 @@ const Segment: React.FC<
               />
             </div>
             <button
+              type="button"
               className="btn btn-ghost btn-xs absolute -top-3 -right-2 rounded-full"
               onClick={handleCancel}
             >
@@ -984,6 +993,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({
                 />
               </div>
               <button
+                type="button"
                 className="btn btn-ghost btn-xs absolute -top-3 -right-2 rounded-full"
                 onClick={() => setFormOpen(false)}
               >
