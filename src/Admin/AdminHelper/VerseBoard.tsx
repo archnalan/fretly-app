@@ -232,7 +232,7 @@ const Board: React.FC = () => {
     const newSegmentId = Date.now().toString();
     const newSegment: SegmentType = {
       id: newSegmentId,
-      segment: "New lyric...",
+      segment: "",
       lyricLine: tempLineId,
     };
 
@@ -414,6 +414,7 @@ const Row: React.FC<RowProps> = ({
   const [addFormOpen, setAddFormOpen] = useState(false);
   const [addFormChord, setAddFormChord] = useState("");
   const [addFormSegment, setAddFormSegment] = useState("");
+  const [isNewSegment, setIsNewSegment] = useState(false);
 
   useEffect(() => {
     if (!focused) {
@@ -438,6 +439,7 @@ const Row: React.FC<RowProps> = ({
         setEditedSegment(segmentToEdit);
         const curentChord = chords.find((c) => c.id === segmentToEdit.chordId);
         setEditedChord(curentChord || { id: "", chord: "" });
+        setIsNewSegment(segmentToEdit.segment === "");
       }
     }
   }, [editModeSegmentId, segments, chords]);
@@ -587,27 +589,32 @@ const Row: React.FC<RowProps> = ({
     setEditedSegment(seg);
     const curentChord = chords.find((c) => c.id === seg.chordId);
     setEditedChord(curentChord || { id: "", chord: "" });
+    setIsNewSegment(false);
   };
 
   const handleSave = () => {
     if (editSegment && editedSegment) {
-      setSegments((prevSegments) =>
-        prevSegments.map((s) =>
-          s.id === editSegment.id
-            ? {
-                ...s,
-                segment: editedSegment.segment,
-                chordId: editedChord?.id,
-              }
-            : s
-        )
-      );
+      if (editedSegment.segment.trim() !== "" || isNewSegment) {
+        setSegments((prevSegments) =>
+          prevSegments.map((s) =>
+            s.id === editSegment.id
+              ? {
+                  ...s,
+                  segment: editedSegment.segment || "...",
+                  chordId: editedChord?.id,
+                }
+              : s
+          )
+        );
+      }
     }
+    setIsNewSegment(false);
     setEditSegment(null);
     setEditModeSegmentId(null);
   };
 
   const filteredSegments = segments.filter((s) => s.lyricLine === line);
+
   return (
     <div
       tabIndex={0}
@@ -654,7 +661,11 @@ const Row: React.FC<RowProps> = ({
               setEditedSegment={setEditedSegment}
               editedChord={editedChord}
               setEditedChord={setEditedChord}
-              handleCancel={() => setEditSegment(null)}
+              handleCancel={() => {
+                setEditSegment(null);
+                setEditModeSegmentId(null);
+                setIsNewSegment(false);
+              }}
             />
           </div>
         ))}
@@ -753,7 +764,13 @@ const Segment: React.FC<
         }`}
       >
         {editing ? (
-          <form onSubmit={handleSave} className="flex relative">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            className="flex relative"
+          >
             <div className="flex flex-col gap-2 me-1">
               <select
                 value={editedChord?.id || ""}
@@ -780,6 +797,7 @@ const Segment: React.FC<
                   handleSegmentChange(e);
                 }}
                 className="input h-[1.5rem] rounded-sm bg-base-100/75 max-w-[12rem]"
+                placeholder="Enter lyrics..."
               />
             </div>
             <button
@@ -805,7 +823,7 @@ const Segment: React.FC<
               <p className="text-sm text-neutral-100">{chord}</p>
             </div>
             <div className="mt-2">
-              <p className="text-sm text-neutral-100">{segment}</p>
+              <p className="text-sm text-neutral-100">{segment || "_"}</p>
             </div>
           </div>
         )}
@@ -894,13 +912,15 @@ const AddSegment: React.FC<AddSegmentProps> = ({
       e.preventDefault();
     }
 
-    if (!addFormSegment || addFormSegment.trim() === "") {
+    const hasText = addFormSegment && addFormSegment.trim() !== "";
+    const hasChord = addFormChord && addFormChord.trim() !== "";
+    if (!hasText && !hasChord) {
       setFormOpen(false);
       return;
     }
 
     setChords((pv: ChordType[]) => {
-      if (addFormChord && addFormChord !== "") {
+      if (hasChord) {
         const newChord: ChordType = {
           id: Date.now().toString(),
           chord: chords.find((c) => c.id === addFormChord)?.chord || "",
@@ -909,7 +929,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({
         setSegments((pv) => {
           const newSegment: SegmentType = {
             id: Date.now().toString(),
-            segment: addFormSegment.trim(),
+            segment: hasText ? addFormSegment.trim() : "_",
             lyricLine,
             chordId: newChord.id,
           };
@@ -919,7 +939,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({
 
         return [...pv, newChord];
       } else {
-        // No chord selected, just create the segment
+        // No chord selected, just create the segment with text
         setSegments((pv) => {
           const newSegment: SegmentType = {
             id: Date.now().toString(),
