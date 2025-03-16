@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 import { Item } from "../../DataModels/TabsModel";
+import { motion } from "framer-motion";
 
 type TabsProps = {
   initialItems: Item[];
-  itemsCountLimit?: number;
+  itemsCountLimit: number;
 };
 const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
   const [items, setItems] = useState<Item[]>(initialItems);
@@ -63,63 +64,67 @@ const TabsComponent = ({ initialItems, itemsCountLimit }: TabsProps) => {
     }
   };
   return (
-    <div className="bg-base-200 flex justify-center items-center py-4">
-      <div className="flex flex-col w-full">
-        <div className=" p-1 ring-2  rounded-xl flex justify-start flex-wrap items-center gap-x-2 font-semibold text-primary">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              ref={item.id === INITIAL_ID ? firstBtnRef : null}
-              className={`outline-none min-w-fit p-2 flex items-center rounded-xl text-cneter focus:ring-2 focus:bg-base-100 focus:text-primary ${
-                selectedTab === item.id
-                  ? "ring-2 bg-base-100 text-primary"
-                  : "hover:bg-opacity-50 "
-              } `}
-              onClick={() => setSelectedTab(item.id)}
-            >
-              <div className="mr-[1rem]">
-                {item.title} &nbsp; {index + 1}
-              </div>
+    <motion.div layout>
+      <div className="bg-base-200 flex justify-center items-center py-4">
+        <div className="flex flex-col w-full">
+          <div className=" p-2 ring-2 ring-neutral/15 rounded-xl flex justify-start flex-wrap items-center gap-x-2 font-semibold text-primary/75 bg-base-300 ">
+            {items.map((item, index) => (
+              <div
+                key={index}
+                ref={item.id === INITIAL_ID ? firstBtnRef : null}
+                className={`outline-none min-w-fit py-2 ps-2 pe-1 flex items-center rounded-xl text-cneter focus:ring-2 focus:bg-base-100 focus:text-primary cursor-pointer ${
+                  selectedTab === item.id
+                    ? "ring-2 bg-base-100 text-primary shadow-lg"
+                    : " hover:bg-base-100/50 "
+                } `}
+                onClick={() => setSelectedTab(item.id)}
+              >
+                <div className="mr-[1rem]">
+                  {item.title} &nbsp; {index + 1}
+                </div>
 
-              <div className="flex align-center gap-1">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-circle btn-ghost right-2 top-2 "
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTabRemove(item.id);
-                  }}
-                  disabled={items.length === 1}
-                >
-                  <IoClose className="font-bold text-md" />
-                </button>
-                <div className="h-[100%] w-[0.01em] bg-base-100 border border-base-100 self-stretch"></div>
+                <div className="flex items-center justify-between p-0">
+                  <button
+                    type="button"
+                    className={`btn btn-sm btn-circle btn-ghost text-primary top-2 ${
+                      selectedTab === item.id
+                        ? "hover:bg-base-200"
+                        : "hover:bg-base-100"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTabRemove(item.id);
+                    }}
+                  >
+                    <IoClose />
+                  </button>
+                </div>
               </div>
+            ))}
+            <div className="flex align-center gap-1 ">
+              <button
+                className="btn btn-ghost btn-circle btn-sm hover:bg-base-100/50 text-primary"
+                onClick={() => handleAddTab()}
+                disabled={items.length > itemsCountLimit - 1}
+              >
+                <IoMdAdd size={20} />
+              </button>
             </div>
-          ))}
-          <div className="flex align-center gap-1 ">
-            <button
-              className="btn btn-ghost btn-circle btn-sm "
-              onClick={() => handleAddTab()}
-              disabled={items.length > 11}
-            >
-              <IoMdAdd />
-            </button>
+          </div>
+
+          <div className="bg-base-300 p-2 ring-2 ring-neutral/15 rounded-xl mt-4 border">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className={`${selectedTab === item.id ? "" : "hidden"}`}
+              >
+                {item.content}
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="bg-base-200 p-2 rounded-xl">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className={`${selectedTab === item.id ? "" : "hidden"}`}
-            >
-              {item.content}
-            </div>
-          ))}
-        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

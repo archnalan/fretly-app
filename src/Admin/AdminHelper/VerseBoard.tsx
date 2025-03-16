@@ -158,7 +158,7 @@ interface AddSegmentProps {
 
 export const VerseBoard: React.FC = () => {
   return (
-    <div className="h-screen w-full bg-base-200 text-neutral overflow-y-auto">
+    <div className="h-screen w-full bg-base-300 text-neutral overflow-y-auto">
       <Board />
     </div>
   );
@@ -311,11 +311,11 @@ const Board: React.FC = () => {
       <div className="w-full flex items-center">
         <div
           className={`w-10 h-0 border  border-dashed ${
-            lines.length > 0 ? "border-neutral/20" : "border-primary"
+            lines.length > 0 ? "border-neutral/25" : "border-primary"
           }`}
         ></div>
         <button
-          className={`btn btn-sm rounded  hover:border-primary/10 disabled:bg-neutral/5 disabled:border-neutral/10 ${
+          className={`btn btn-sm rounded  hover:border-primary/10 disabled:bg-neutral/5 disabled:border-neutral/25 ${
             lines.length > 0
               ? "text-neutral border-neutral"
               : "text-primary border-primary"
@@ -328,7 +328,7 @@ const Board: React.FC = () => {
         </button>
         <div
           className={`w-full h-0 border  border-dashed ${
-            lines.length > 0 ? "border-neutral/20" : "border-primary"
+            lines.length > 0 ? "border-neutral/25" : "border-primary"
           }`}
         ></div>
       </div>
@@ -706,7 +706,7 @@ const Row: React.FC<RowProps> = ({
   return (
     <div
       tabIndex={0}
-      className={`w-full relative p-[2.5rem_2rem_1rem] flex gap-3 flex-wrap  ${
+      className={`w-full relative p-[2.5rem_2rem_1rem] flex gap-3 flex-wrap bg-base-200  ${
         focused
           ? "ring-1 rounded-2xl ring-primary"
           : "ring-1 rounded-2xl ring-neutral/20"
@@ -848,7 +848,7 @@ const Segment: React.FC<
           handleDragStart(e, { segment, id, lyricLine, chordId })
         }
         className={`h-[5rem] flex items-center cursor-grab rounded p-2 active:cursor-grabbing ${
-          focused ? "bg-neutral" : "bg-neutral/65"
+          focused ? "bg-base-content" : "bg-base-content/75"
         }`}
       >
         {editing ? (

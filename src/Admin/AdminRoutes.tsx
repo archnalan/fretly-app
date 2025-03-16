@@ -29,11 +29,15 @@ import LyricLines from "./Chodify/components/Verses/LyricLines";
 import Verses from "./Chodify/components/Verses/Verses";
 import { CustomKanban } from "./AdminHelper/CustomKanban";
 import { VerseBoard } from "./AdminHelper/VerseBoard";
+import Login from "../StartApp/Login";
+import SongBoard from "./Chodify/SongBoard";
 
 const AdminRoutes: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Login />}></Route>
+        <Route path="chordify" element={<SongBoard />}></Route>
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />}></Route>
           <Route path="chordify" element={<Chordify />}></Route>
