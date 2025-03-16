@@ -1,7 +1,14 @@
-import React, { useState, DragEvent, FormEvent, useEffect } from "react";
+import React, {
+  useState,
+  DragEvent,
+  FormEvent,
+  useEffect,
+  useRef,
+} from "react";
 import { FiEdit, FiPlus, FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
+import { set } from "date-fns";
 
 interface SegmentType {
   id: string;
@@ -158,7 +165,7 @@ export const VerseBoard: React.FC = () => {
 };
 
 const Board: React.FC = () => {
-  const [segments, setSegments] = useState<SegmentType[]>(DEFAULT_SONG);
+  const [segments, setSegments] = useState<SegmentType[]>([]);
   const [chords, setChords] = useState<ChordType[]>(DEFAULT_SONG_CHORDS);
   const [focusedRow, setFocusedRow] = useState<string | null>(null);
   const [trackLines, setTrackLines] = useState<string[]>([]);
@@ -292,9 +299,39 @@ const Board: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full w-full gap-3 p-12 overflow-scroll">
-      <p className="text-gray-600 text-sm ">
-        Each segment can be assigned a chord.
-      </p>
+      {lines.length > 0 ? (
+        <p className="text-gray-600 text-sm ">
+          Each segment can be assigned a chord.
+        </p>
+      ) : (
+        <p className="text-gray-600 text-sm ">
+          Click the button below to add a new line.
+        </p>
+      )}
+      <div className="w-full flex items-center">
+        <div
+          className={`w-10 h-0 border  border-dashed ${
+            lines.length > 0 ? "border-neutral/20" : "border-primary"
+          }`}
+        ></div>
+        <button
+          className={`btn btn-sm rounded  hover:border-primary/10 disabled:bg-neutral/5 disabled:border-neutral/10 ${
+            lines.length > 0
+              ? "text-neutral border-neutral"
+              : "text-primary border-primary"
+          }`}
+          disabled={lines.length > 0}
+          onClick={() => addLine("0")}
+        >
+          <FiPlus />
+          <span className="text-xs">New Line</span>
+        </button>
+        <div
+          className={`w-full h-0 border  border-dashed ${
+            lines.length > 0 ? "border-neutral/20" : "border-primary"
+          }`}
+        ></div>
+      </div>
       {lines.map((line) => (
         <div
           key={line}
@@ -320,20 +357,20 @@ const Board: React.FC = () => {
           {focusedRow === line && (
             <div className="absolute bottom-[-2rem] right-7 ">
               <button
-                className="btn btn-sm rounded-t-none rounded-r-none text-primary border-primary border-t-neutral/10 border-r-0 "
+                className="btn btn-sm rounded-t-none rounded-r-none text-primary border-primary hover:border-primary hover:bg-primary/10 border-t-neutral/10 border-r-0 "
                 onClick={() => addLine(line)}
               >
                 <FiPlus />
                 <span className="text-xs text-primary">New Line</span>
               </button>
               <button
-                className={`btn btn-sm rounded-t-none rounded-l-none border-primary border-t-neutral/10 ${
+                className={`btn btn-sm rounded-t-none rounded-l-none border-primary hover:border-primary hover:bg-error/10 border-t-neutral/10 ${
                   isOver
-                    ? "text-error bg-error/50  ring-red-600 ring-inset ring-2"
+                    ? "text-error bg-error/50  ring-red-600/30 ring-inset ring-2"
                     : "text-error"
                 }`}
                 onClick={() => {
-                  if (lines.length > 1) {
+                  if (lines.length > 0) {
                     document.getElementById(`my_modal_${line}`)?.showModal();
                   }
                 }}
@@ -346,12 +383,10 @@ const Board: React.FC = () => {
                   e.preventDefault();
                   setIsOver(false);
                   const segmentId = e.dataTransfer.getData("segmentId");
-                  if (!(lines.length === 1 && segments.length === 1)) {
-                    handleSegmentRemoval(segmentId);
-                  }
+                  handleSegmentRemoval(segmentId);
                 }}
               >
-                <FiTrash />{" "}
+                <FaFire />{" "}
                 <span
                   className={`text-xs ${
                     isOver ? "text-neutral-500 " : "text-error"
@@ -384,13 +419,15 @@ const Board: React.FC = () => {
           )}
         </div>
       ))}
-      <div>
-        <button className="btn btn-primary" onClick={handleVerseSave}>
-          Save
-        </button>
-      </div>
+      {lines.length > 0 && (
+        <div>
+          <button className="btn btn-primary" onClick={handleVerseSave}>
+            Save
+          </button>
+        </div>
+      )}
 
-      <BurnBarrel setSegments={setSegments} setChords={setChords} />
+      {/* <BurnBarrel setSegments={setSegments} setChords={setChords} /> */}
     </div>
   );
 };
@@ -415,6 +452,8 @@ const Row: React.FC<RowProps> = ({
   const [addFormChord, setAddFormChord] = useState("");
   const [addFormSegment, setAddFormSegment] = useState("");
   const [isNewSegment, setIsNewSegment] = useState(false);
+  const [isNewLine, setIsNewLine] = useState(false);
+  const addSegButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!focused) {
@@ -440,9 +479,19 @@ const Row: React.FC<RowProps> = ({
         const curentChord = chords.find((c) => c.id === segmentToEdit.chordId);
         setEditedChord(curentChord || { id: "", chord: "" });
         setIsNewSegment(segmentToEdit.segment === "");
+
+        const lineSegments = segments.filter((s) => s.lyricLine === line);
+
+        const isNewlyCreatedLine =
+          lineSegments.length === 1 &&
+          segmentToEdit.id === lineSegments[0].id &&
+          segmentToEdit.segment === "";
+
+        setIsNewSegment(isNewlyCreatedLine);
+        setIsNewLine(isNewlyCreatedLine);
       }
     }
-  }, [editModeSegmentId, segments, chords]);
+  }, [editModeSegmentId, segments, chords, line]);
 
   const handleAddFormSave = () => {
     if (!addFormSegment || addFormSegment.trim() === "") {
@@ -590,22 +639,61 @@ const Row: React.FC<RowProps> = ({
     const curentChord = chords.find((c) => c.id === seg.chordId);
     setEditedChord(curentChord || { id: "", chord: "" });
     setIsNewSegment(false);
+    setIsNewLine(false);
   };
 
   const handleSave = () => {
     if (editSegment && editedSegment) {
-      if (editedSegment.segment.trim() !== "" || isNewSegment) {
+      const hasEmptyText =
+        !editedSegment?.segment || editedSegment.segment === "";
+      const noChord = !editedChord?.id;
+
+      if (hasEmptyText && noChord) {
+        setSegments((prevSegments) =>
+          prevSegments.filter((s) => s.id !== editedSegment.id)
+        );
+      } else if (hasEmptyText && !noChord) {
         setSegments((prevSegments) =>
           prevSegments.map((s) =>
             s.id === editSegment.id
               ? {
                   ...s,
-                  segment: editedSegment.segment || "...",
+                  segment: "-",
                   chordId: editedChord?.id,
                 }
               : s
           )
         );
+      } else if (hasEmptyText) {
+        setSegments((prevSegments) =>
+          prevSegments.map((s) =>
+            s.id === editSegment.id
+              ? {
+                  ...s,
+                  segment: "...",
+                  chordId: editedChord?.id,
+                }
+              : s
+          )
+        );
+      } else {
+        setSegments((prevSegments) =>
+          prevSegments.map((s) =>
+            s.id === editSegment.id
+              ? {
+                  ...s,
+                  segment: editedSegment.segment.trim(),
+                  chordId: editedChord?.id,
+                }
+              : s
+          )
+        );
+      }
+      if (isNewSegment && isNewLine && focused) {
+        setTimeout(() => {
+          setAddFormOpen(true);
+          setIsNewLine(false);
+        }, 10);
       }
     }
     setIsNewSegment(false);
@@ -929,7 +1017,7 @@ const AddSegment: React.FC<AddSegmentProps> = ({
         setSegments((pv) => {
           const newSegment: SegmentType = {
             id: Date.now().toString(),
-            segment: hasText ? addFormSegment.trim() : "_",
+            segment: hasText ? addFormSegment.trim() : "-",
             lyricLine,
             chordId: newChord.id,
           };
