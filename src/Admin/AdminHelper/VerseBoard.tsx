@@ -10,10 +10,28 @@ import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
 import { set } from "date-fns";
 
+const songSections = [
+  "Intro",
+  "Verse",
+  "PreChorus",
+  "Chorus",
+  "PostChorus",
+  "Bridge",
+  "Interlude",
+  "Solo",
+  "Refrain",
+  "Coda",
+  "Outro",
+] as const;
+
+type SongSection = typeof songSections[number];
+
 interface SegmentType {
   id: string;
   segment: string;
   lyricLine: string;
+  partNumber: number;
+  partName: SongSection;
   chordId?: string;
 }
 
@@ -29,69 +47,109 @@ const DEFAULT_SONG: SegmentType[] = [
     id: "1",
     lyricLine: "1",
     chordId: "1",
+    partNumber: 1,
+    partName: "Verse",
   },
-  { segment: "Grace", id: "2", lyricLine: "1", chordId: "17" },
+  { segment: "Grace", id: "2", lyricLine: "1", chordId: "17", partNumber: 1 ,partName: "Verse"},
   // LINE 02
-  { segment: "How", id: "3", lyricLine: "2" },
-  { segment: "sweet the", id: "4", lyricLine: "2", chordId: "4" },
+  { segment: "How", id: "3", lyricLine: "2", partNumber: 1, partName: "Verse" },
+  {
+    segment: "sweet the",
+    id: "4",
+    lyricLine: "2",
+    chordId: "4",
+    partNumber: 1,
+    partName: "Verse",
+  },
   {
     segment: "sound",
     id: "5",
     lyricLine: "2",
     chordId: "1",
+    partNumber: 1,
+    partName: "Verse",
   },
   // LINE 03
-  { segment: "That saved a wretch like", id: "6", lyricLine: "3" },
-  { segment: "me", id: "7", lyricLine: "3", chordId: "5" },
+  {
+    segment: "That saved a wretch like",
+    id: "6",
+    lyricLine: "3",
+    partNumber: 1,
+    partName: "Verse",
+  },
+  { segment: "me", id: "7", lyricLine: "3", chordId: "5", partNumber: 1 , partName: "Verse"},
 
   // LINE 04
   {
     segment: "I ",
     id: "8",
     lyricLine: "4",
+    partNumber: 1,
+    partName: "Verse",
   },
   {
     segment: "once was",
     id: "9",
     lyricLine: "4",
     chordId: "1",
+    partNumber: 1,
+    partName: "Verse",
   },
-  { segment: "lost, but", id: "10", lyricLine: "4", chordId: "17" },
+  {
+    segment: "lost, but",
+    id: "10",
+    lyricLine: "4",
+    chordId: "17",
+    partNumber: 1,
+    partName: "Verse",    
+  },
   {
     segment: "now am",
     id: "11",
     lyricLine: "4",
     chordId: "4",
+    partNumber: 1,
+    partName: "Verse",
   },
   {
     segment: "found,",
     id: "12",
     lyricLine: "4",
     chordId: "1",
+    partNumber: 1,
+    partName: "Verse",
   },
   // LINE 5
   {
     segment: "Was",
     id: "13",
     lyricLine: "5",
+    partNumber: 1,
+    partName: "Verse",
   },
   {
     segment: "blind, but",
     id: "14",
     lyricLine: "5",
     chordId: "6",
+    partNumber: 1,
+    partName: "Verse",
   },
   {
     segment: "now I",
     id: "15",
     lyricLine: "5",
     chordId: "5",
+    partNumber: 1,
+    partName: "Verse",
   },
   {
     segment: "see.",
     id: "16",
     lyricLine: "5",
     chordId: "1",
+    partNumber: 1,
+    partName: "Verse",
   },
 ];
 
